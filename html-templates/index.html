@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>User Management System</title>
+  <link rel="stylesheet" href="../assets/css/modules/bootstrap.min.css">
+  <link rel="stylesheet" href="../assets/css/styles.css">
+</head>
+<body>
+
+<div class="container py-5">
+  <div class="col-12">
+    <h1 class="fs-3 mb-4">Users</h1>
+
+    <div class="d-flex mb-3 gap-3">
+      <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">Add</button>
+
+      <form class="d-flex gap-3 bulk-action-form" method="post">
+        <select class="form-select w-auto bulk-action-select" aria-label="Actions select">
+          <option value="" selected>-Please-Select-</option>
+          <option value="set-active">Set active</option>
+          <option value="set-not-active">Set not active</option>
+          <option value="delete">Delete</option>
+        </select>
+        <input class="btn btn-primary bulk-action-confirm" type="submit" value="OK">
+      </form>
+    </div>
+
+    <table class="table table-bordered table-hover">
+      <thead>
+      <tr>
+        <th>
+          <label>
+            <input class="form-check-input select-all-users-checkbox" type="checkbox">
+          </label>
+        </th>
+        <th scope="col">Name</th>
+        <th scope="col">Role</th>
+        <th scope="col">Status</th>
+        <th scope="col">Options</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+        <td class="align-middle">
+          <label class="form-check-label">
+            <input class="form-check-input user-selection-checkbox" type="checkbox" value="">
+          </label>
+        </td>
+        <td class="align-middle">John Doe</td>
+        <td class="align-middle">Admin</td>
+        <td class="text-center align-middle">
+          <span class="user-status"></span>
+        </td>
+        <td class="text-center align-middle">
+          <div class="border border-dark rounded d-inline-block">
+            <a href="#" class="d-inline-block text-decoration-none p-1 border-end border-dark" data-bs-toggle="modal"
+               data-bs-target="#updateUserModal">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="grey"
+                   class="bi bi-pencil-square" viewBox="0 0 16 16">
+                <path
+                    d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                <path fill-rule="evenodd"
+                      d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"/>
+              </svg>
+            </a>
+            <a href="#" class="d-inline-block text-decoration-none p-1" data-bs-toggle="modal"
+               data-bs-target="#deleteUserModal">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="grey" class="bi bi-trash"
+                   viewBox="0 0 16 16">
+                <path
+                    d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
+                <path
+                    d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
+              </svg>
+            </a>
+          </div>
+        </td>
+      </tr>
+
+      <tr>
+        <td class="align-middle">
+          <label class="form-check-label">
+            <input class="form-check-input user-selection-checkbox" type="checkbox" value="">
+          </label>
+        </td>
+        <td class="align-middle">Test User</td>
+        <td class="align-middle">User</td>
+        <td class="text-center align-middle">
+          <span class="user-status user-status--active"></span>
+        </td>
+        <td class="text-center align-middle">
+          <div class="border border-dark rounded d-inline-block">
+            <a href="#" class="d-inline-block text-decoration-none p-1 border-end border-dark" data-bs-toggle="modal"
+               data-bs-target="#updateUserModal">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="grey"
+                   class="bi bi-pencil-square" viewBox="0 0 16 16">
+                <path
+                    d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                <path fill-rule="evenodd"
+                      d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"/>
+              </svg>
+            </a>
+            <a href="#" class="d-inline-block text-decoration-none p-1" data-bs-toggle="modal"
+               data-bs-target="#deleteUserModal">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="grey" class="bi bi-trash"
+                   viewBox="0 0 16 16">
+                <path
+                    d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
+                <path
+                    d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
+              </svg>
+            </a>
+          </div>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+
+    <div class="d-flex mt-3 gap-3">
+      <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">Add</button>
+
+      <form class="d-flex gap-3 bulk-action-form" method="post">
+        <select class="form-select w-auto bulk-action-select" aria-label="Actions select">
+          <option value="" selected>-Please-Select-</option>
+          <option value="set-active">Set active</option>
+          <option value="set-not-active">Set not active</option>
+          <option value="delete">Delete</option>
+        </select>
+        <input class="btn btn-primary bulk-action-confirm" type="submit" value="OK">
+      </form>
+    </div>
+
+    <!-- Delete User Modal -->
+    <div class="modal fade" id="deleteUserModal" tabindex="-1" aria-labelledby="deleteUserModalLabel"
+         aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2 class="modal-title fs-5" id="deleteUserModalLabel">Delete Confirmation</h2>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cancel"></button>
+          </div>
+          <div class="modal-body">
+            Are you sure you want to delete <span class="fw-bold modal-user-name">John Doe</span>?
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-danger">Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add User Modal -->
+    <div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2 class="modal-title fs-5" id="addUserModalLabel">Add User</h2>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form>
+              <div class="mb-3">
+                <label for="add_first_name" class="form-label">First name</label>
+                <input type="text" class="form-control" id="add_first_name" name="first_name">
+              </div>
+              <div class="mb-3">
+                <label for="add_last_name" class="form-label">Last name</label>
+                <input type="text" class="form-control" id="add_last_name" name="last_name">
+              </div>
+              <div class="form-check form-switch ps-0 mb-3">
+                <label class="form-check-label" for="add_status">Status</label>
+                <input class="form-check-input ms-0 float-none d-block" type="checkbox" role="switch" id="add_status"
+                       name="status">
+              </div>
+              <div class="mb-3">
+                <label class="form-label" for="add_role">Role</label>
+                <select class="form-select" aria-label="User add role select" id="add_role" name="role">
+                  <option selected>-Please Select-</option>
+                  <option value="admin">Admin</option>
+                  <option value="user">User</option>
+                </select>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary">Add</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Update User Modal -->
+    <div class="modal fade" id="updateUserModal" tabindex="-1" aria-labelledby="updateUserModalLabel"
+         aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2 class="modal-title fs-5" id="updateUserModalLabel">Add User</h2>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form>
+              <div class="mb-3">
+                <label for="update_first_name" class="form-label">First name</label>
+                <input type="text" class="form-control" id="update_first_name" name="first_name" value="John">
+              </div>
+              <div class="mb-3">
+                <label for="update_last_name" class="form-label">Last name</label>
+                <input type="text" class="form-control" id="update_last_name" name="last_name" value="Doe">
+              </div>
+              <div class="form-check form-switch ps-0 mb-3">
+                <label class="form-check-label" for="update_status">Status</label>
+                <input class="form-check-input ms-0 float-none d-block" type="checkbox" role="switch" id="update_status"
+                       name="status" checked="checked">
+              </div>
+              <div class="mb-3">
+                <label class="form-label" for="update_role">Role</label>
+                <select class="form-select" aria-label="User update role select" id="update_role" name="role">
+                  <option>-Please Select-</option>
+                  <option value="admin" selected>Admin</option>
+                  <option value="user">User</option>
+                </select>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary">Update</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bulk Action Confirm Modal -->
+    <div class="modal fade" id="bulkActionConfirmModal" tabindex="-1" aria-labelledby="bulkActionConfirmModalLabel"
+         aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2 class="modal-title fs-5" id="bulkActionConfirmModalLabel">Warning</h2>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cancel"></button>
+          </div>
+          <div class="modal-body">
+            Warning
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">OK</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="../assets/js/modules/jquery-3.7.1.min.js"></script>
+<script src="../assets/js/modules/bootstrap.bundle.min.js"></script>
+<script src="../assets/js/script.js"></script>
+</body>
+</html>
