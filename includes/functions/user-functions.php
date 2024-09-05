@@ -56,8 +56,6 @@ function updateUser($id, $first_name, $last_name, $role_id, $status)
     ];
 }
 
-
-
 function deleteUser(int $id): false|mysqli_stmt
 {
     $query = "DELETE FROM users WHERE id = ? LIMIT 1";
@@ -214,6 +212,28 @@ function handleUserDelete(): void
             'status' => false,
             'code' => 100,
             'error' => 'User not found.',
+        ];
+    }
+
+    echo json_encode($data);
+}
+
+function handleUserDeleteMultiple(): void
+{
+    if (isset($_POST['users_ids'])) {
+        $usersIds = explode(',', $_POST['users_ids']);
+        usersDeleteMultiple($usersIds);
+        $data = [
+            'status' => true,
+            'code' => 200,
+            'error' => null,
+            'users_ids' => $usersIds,
+        ];
+    } else {
+        $data = [
+            'status' => false,
+            'code' => 100,
+            'error' => 'No users ids provided.',
         ];
     }
 

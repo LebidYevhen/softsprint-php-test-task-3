@@ -74,6 +74,7 @@ function submitUserAddForm(form) {
                 addStatusMessage(`User with id ${response.id} has been created.`, 'alert-success');
                 modalHide($('#addUserModal'));
                 getUserResponse(response.id);
+                $('.select-all-users-checkbox').prop('checked', false);
             }
         },
         function (xhr, status) {
@@ -140,10 +141,10 @@ function submitUserDeleteForm(form, userTableRow, userId) {
 
 }
 
-function openUserDeleteModal(user_id) {
+function openUserDeleteModal(user_id, multiple = false) {
     ajaxRequest(
         '/includes/modal/delete-user.php',
-        {user_id},
+        {user_id, multiple},
         function (response) {
             $('body').prepend(response);
             const deleteUserModal = $('#deleteUserModal');
@@ -171,7 +172,7 @@ function openUserUpdateModal(user_id) {
             updateUserModal.modal('show');
             updateUserModal.on('hidden.bs.modal', function (e) {
                 updateUserModal.remove()
-            })
+            });
         },
         function (xhr, status) {
             console.error("Error fetching modal content:", status);
@@ -206,5 +207,13 @@ function renderUserRow(response) {
 }
 
 function replaceUserRow(userId, response) {
-    $('.users-table').find(`.user-table-row[data-user-id='${userId}']`).replaceWith(response);
+    const usersTable = $('.users-table');
+    let updatedRow = usersTable.find(`.user-table-row[data-user-id='${userId}']`);
+    let checkbox = usersTable.find(`.user-selection-checkbox[value='${userId}']`);
+
+    if (updatedRow.length) {
+        updatedRow.replaceWith(response);
+        let updatedCheckbox = usersTable.find(`.user-selection-checkbox[value='${userId}']`);
+        updatedCheckbox.prop('checked', checkbox.prop('checked'))
+    }
 }

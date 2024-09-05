@@ -15,10 +15,13 @@ function selectAllUsers() {
 }
 
 function userSelection() {
-    $('.user-selection-checkbox').on('click', function (e) {
+    $('.users-table').on('click', '.user-selection-checkbox', function (e) {
         const selectAllUsersCheckbox = $('.select-all-users-checkbox');
         if (!$(this).prop('checked') && selectAllUsersCheckbox.prop('checked')) {
             selectAllUsersCheckbox.prop('checked', false);
+        }
+        if ($('.user-selection-checkbox').length === getSelectedUserIds().length) {
+            selectAllUsersCheckbox.prop('checked', true)
         }
     })
 }
@@ -37,19 +40,23 @@ function validateBulkActionForm(form) {
     const selectedUsers = $('.user-selection-checkbox:checked').length;
     const bulkActionModal = $('#bulkActionModal');
 
-    if (bulkAction && selectedUsers > 0) {
-        return true;
-    }
-
     if (!bulkAction && selectedUsers > 0) {
         showModal(bulkActionModal, 'No action selected.');
+        return false;
     }
 
     if (bulkAction && selectedUsers === 0) {
         showModal(bulkActionModal, 'No users selected.');
+        return false;
     }
 
-    return false;
+    if (bulkAction === 'delete' && selectedUsers > 0) {
+        openUserDeleteMultipleModal(getSelectedUserIds(), true);
+        handleUserDeleteMultiple();
+        return false;
+    }
+
+    return bulkAction && selectedUsers > 0;
 }
 
 function submitBulkActionForm(form) {
@@ -86,6 +93,60 @@ function submitBulkActionForm(form) {
             console.error("Error fetching modal content:", status);
         }
     )
+}
+
+function openUserDeleteMultipleModal(users_ids) {
+    ajaxRequest(
+        '/includes/modal/delete-user-multiple.php',
+        {users_ids},
+        function (response) {
+            $('body').prepend(response);
+            const deleteUserMultipleModal = $('#deleteUserMultipleModal');
+            deleteUserMultipleModal.modal('show');
+            deleteUserMultipleModal.on('hidden.bs.modal', function (e) {
+                deleteUserMultipleModal.remove()
+            })
+        },
+        function (xhr, status) {
+            console.error("Error fetching modal content:", status);
+        },
+        'POST',
+        'html',
+        false
+    )
+}
+
+function handleUserDeleteMultiple() {
+    $('.user-delete-multiple-form').submit(function (e) {
+        e.preventDefault();
+        submitUserDeleteMultipleForm($(this));
+    });
+}
+
+function submitUserDeleteMultipleForm(form) {
+    const deleteUserMultipleModal = $('#deleteUserMultipleModal');
+    const formData = extractFormData(form, ['action', 'users_ids']);
+
+    ajaxRequest(
+        '/includes/process-request.php',
+        formData,
+        function (response) {
+            if (!response.status) {
+                modalHide(deleteUserMultipleModal);
+                addStatusMessage(response.error, 'alert-danger');
+            } else {
+                modalHide(deleteUserMultipleModal);
+                addStatusMessage(`Users with ids: ${response.users_ids.join(', ')} deleted.`, 'alert-success');
+                response.users_ids.forEach(userId => {
+                    removeUserRow(userId);
+                })
+            }
+        },
+        function (xhr, status) {
+            modalHide(deleteUserMultipleModal);
+            addStatusMessage('Could not reach server, please try again later.', 'alert-danger');
+        });
+
 }
 
 function getSelectedUserIds() {

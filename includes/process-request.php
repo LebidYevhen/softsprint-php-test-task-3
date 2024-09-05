@@ -18,6 +18,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['action'])) {
         case 'bulk_action':
             handleBulkAction();
             break;
+        case 'user_delete_multiple':
+            handleUserDeleteMultiple();
+            break;
     }
 } elseif ($_SERVER['REQUEST_METHOD'] === "GET" && isset($_GET['action'])) {
     $action = $_GET['action'];
