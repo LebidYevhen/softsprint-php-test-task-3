@@ -1,6 +1,7 @@
 <?php
 
-require_once INCLUDES_PATH . '/config.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/const.php';
+require_once INCLUDES_PATH . 'config.php';
 require_once FUNCTIONS_PATH . '/database-functions.php';
 $connection = getConnection();
 require_once FUNCTIONS_PATH .  '/validation-functions.php';

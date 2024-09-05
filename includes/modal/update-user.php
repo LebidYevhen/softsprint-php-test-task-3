@@ -1,6 +1,7 @@
 <?php
 
-require_once '../functions.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/const.php';
+require_once INCLUDES_PATH . '/functions.php';
 
 if (isset($_POST['user_id'])) {
     $user = getUser($_POST['user_id']);

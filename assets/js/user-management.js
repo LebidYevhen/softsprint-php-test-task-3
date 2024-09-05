@@ -98,8 +98,14 @@ function submitUserUpdateForm(form, userTableRow, userId) {
                 highlightFormErrors(form, response.error);
             } else {
                 modalHide(updateUserModal);
-                addStatusMessage(`User with id ${userId} updated.`, 'alert-success');
-                getUserResponse(userId, 'replace');
+                let message = `User with id ${userId} was not updated. The field values have not been changed.`;
+                let type = 'alert-info';
+                if (response.updatedFields?.length) {
+                    message = `User with id ${userId} was updated. Updated fields: ${response.updatedFields.join(', ')}.`;
+                    type = 'alert-success';
+                    getUserResponse(userId, 'replace');
+                }
+                addStatusMessage(message, type);
             }
         },
         function (xhr, status) {

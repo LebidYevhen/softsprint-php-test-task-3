@@ -1,6 +1,6 @@
 <?php
 
-function userAdd($first_name, $last_name, $role_id, $status): int|string
+function createUser($first_name, $last_name, $role_id, $status): int|string
 {
     $query = "INSERT INTO users (first_name, last_name, role_id, status) VALUES (?, ?, ?, ?)";
     preparedQuery($query, [
@@ -13,21 +13,52 @@ function userAdd($first_name, $last_name, $role_id, $status): int|string
     return getLastInsertedId();
 }
 
-function userUpdate($id, $first_name, $last_name, $role_id, $status)
+function updateUser($id, $first_name, $last_name, $role_id, $status)
 {
-    $query = "UPDATE users SET first_name = ?, last_name = ?, role_id = ?, status = ? WHERE id = ?";
-    preparedQuery($query, [
-        sanitizeInput($first_name),
-        sanitizeInput($last_name),
-        sanitizeInput($role_id),
-        filter_var(sanitizeInput($status), FILTER_VALIDATE_BOOLEAN) ? 1 : 0,
-        sanitizeInput($id),
-    ]);
+    $user = getUser($id);
 
-    return $id;
+    $fieldsToUpdate = [];
+    $params = [];
+
+    if ($first_name !== $user['first_name']) {
+        $fieldsToUpdate['first_name'] = "first_name = ?";
+        $params[] = sanitizeInput($first_name);
+    }
+    if ($last_name !== $user['last_name']) {
+        $fieldsToUpdate['last_name'] = "last_name = ?";
+        $params[] = sanitizeInput($last_name);
+    }
+    if ($role_id != $user['role_id']) {
+        $fieldsToUpdate['role_id'] = "role_id = ?";
+        $params[] = sanitizeInput($role_id);
+    }
+    $new_status = filter_var(sanitizeInput($status), FILTER_VALIDATE_BOOLEAN) ? 1 : 0;
+    if ($new_status != $user['status']) {
+        $fieldsToUpdate['status'] = "status = ?";
+        $params[] = $new_status;
+    }
+
+    if (empty($fieldsToUpdate)) {
+        return [
+            'id' => $id,
+            'updatedFields' => null,
+        ];
+    }
+
+    $params[] = sanitizeInput($id);
+
+    $query = "UPDATE users SET " . implode(', ', $fieldsToUpdate) . " WHERE id = ?";
+    preparedQuery($query, $params);
+
+    return [
+        'id' => $id,
+        'updatedFields' => array_keys($fieldsToUpdate),
+    ];
 }
 
-function userDelete(int $id): false|mysqli_stmt
+
+
+function deleteUser(int $id): false|mysqli_stmt
 {
     $query = "DELETE FROM users WHERE id = ? LIMIT 1";
     return preparedQuery($query, [$id]);
@@ -53,7 +84,7 @@ function getUser(int $id): false|array|null
               FROM users as u
               INNER JOIN user_roles AS ur ON u.role_id = ur.id
               WHERE u.id = ? LIMIT 1";
-    $stmt = preparedQuery($query, [$id]);
+    $stmt = preparedQuery($query, [sanitizeInput($id)]);
     $result = getStmtResult($stmt);
     if (mysqli_num_rows($result) != 1) {
         return null;
@@ -88,7 +119,7 @@ function handleUserAdd(): void
     ]);
 
     if (empty($validate)) {
-        $userId = userAdd($_POST['first_name'], $_POST['last_name'], $_POST['role_id'], $_POST['status']);
+        $userId = createUser($_POST['first_name'], $_POST['last_name'], $_POST['role_id'], $_POST['status']);
         $data = [
             'status' => true,
             'code' => 200,
@@ -115,12 +146,13 @@ function handleUserUpdate(): void
     ]);
 
     if (empty($validate)) {
-        $userId = userUpdate($_POST['user_id'], $_POST['first_name'], $_POST['last_name'], $_POST['role_id'], $_POST['status']);
+        $updateUser = updateUser($_POST['user_id'], $_POST['first_name'], $_POST['last_name'], $_POST['role_id'], $_POST['status']);
         $data = [
             'status' => true,
             'code' => 200,
             'error' => null,
-            'id' => $userId,
+            'id' => $updateUser['id'],
+            'updatedFields' => $updateUser['updatedFields'],
         ];
     } elseif (!isUserExists($_POST['user_id'])) {
         $data = [
@@ -171,7 +203,7 @@ function handleUserGet(int $user_id): void
 function handleUserDelete(): void
 {
     if (isset($_POST['user_id']) && getUser((int)$_POST['user_id'])) {
-        userDelete($_POST['user_id']);
+        deleteUser($_POST['user_id']);
         $data = [
             'status' => true,
             'code' => 200,
