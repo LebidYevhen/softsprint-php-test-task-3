@@ -6,6 +6,6 @@
     background-color: gray;
 }
 
-.user-status--active {
+.user-status.active {
     background-color: green;
 }

@@ -1,13 +1,31 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport"
-        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>User Management System</title>
-</head>
-<body>
+<?php
 
-</body>
-</html>
+require_once 'const.php';
+require_once INCLUDES_PATH . '/functions.php';
+require_once INCLUDES_PATH . '/header.php';
+?>
+
+    <h1 class="fs-3 mb-4">Users</h1>
+
+    <div class="d-flex mb-3 gap-3">
+        <?php
+        include 'includes/form/bulk-action.php'; ?>
+    </div>
+
+    <div class="status-messages"></div>
+
+<?php
+include_once 'includes/table/users.php'; ?>
+
+    <div class="d-flex mt-3 gap-3">
+        <?php
+        include 'includes/form/bulk-action.php'; ?>
+    </div>
+
+<?php
+include_once 'includes/modal/add-user.php';
+include_once 'includes/modal/bulk-action.php';
+?>
+
+<?php
+require_once 'includes/footer.php'; ?>
