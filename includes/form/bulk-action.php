@@ -1,4 +1,4 @@
-<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">Add</button>
+<button type="button" class="btn btn-primary user-create-btn" data-user-create-update-action="user_create">Add</button>
 <form class="d-flex gap-3 bulk-action-form" method="post">
     <select class="form-select w-auto bulk-action-select" aria-label="Actions select" name="bulk_action">
         <option value="" selected>-Please-Select-</option>

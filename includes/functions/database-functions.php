@@ -36,3 +36,10 @@ function getLastInsertedId(): int|string
 
     return mysqli_insert_id($connection);
 }
+
+function isValueInTableExists($value, $table, $column, $type = null): bool
+{
+    $query = "SELECT $column FROM $table WHERE $column = ? LIMIT 1";
+    $stmt = getStmtResult(preparedQuery($query, [$value], $type));
+    return mysqli_num_rows($stmt) > 0;
+}

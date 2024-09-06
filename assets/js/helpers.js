@@ -24,17 +24,19 @@ function ajaxRequest(url, data, success, error, type = 'POST', dataType = 'json'
 }
 
 function highlightFormErrors(form, errors) {
-    $.each(errors, function (field, message) {
+    $.each(errors.fields, function (field, message) {
         form.find(`[name='${field}']`).after(`<p class="text-danger">${message}</p>`).addClass('border-danger');
     });
+    addStatusMessage(errors.message, 'alert-danger', '.user-create-update-form', 'prepend', false, false);
 }
 
 function clearFormErrors(form) {
     form.find('.text-danger').remove();
+    form.find('.alert').remove();
     removeElClassByClassName(form, 'border-danger');
 }
 
-function addStatusMessage(message, type, container = '.status-messages', location = 'append') {
+function addStatusMessage(message, type, container = '.status-messages', location = 'append', timeout = true, scroll = true) {
     const statusElement = $('<div></div>').addClass(`alert ${type}`).text(message);
     container = $(container);
 
@@ -44,11 +46,15 @@ function addStatusMessage(message, type, container = '.status-messages', locatio
         container.append(statusElement);
     }
 
-    scrollTo(container);
+    if (scroll) {
+        scrollTo(container);
+    }
 
-    setTimeout(() => {
-        statusElement.remove();
-    }, 5000);
+    if (timeout) {
+        setTimeout(() => {
+            statusElement.remove();
+        }, 5000);
+    }
 }
 
 function scrollTo(element, speed = 500) {
@@ -59,4 +65,16 @@ function scrollTo(element, speed = 500) {
 
 function modalHide(modal) {
     modal.modal('hide');
+}
+
+function setInputValue(input, value, isCheckbox = false, isChecked = false) {
+    if (isCheckbox) {
+        input.prop('checked', isChecked);
+    } else {
+        input.val(value);
+    }
+}
+
+function getFormInputByName(form, name) {
+    return form.find(`input[name='${name}']`);
 }

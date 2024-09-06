@@ -6,8 +6,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['action'])) {
     $action = $_POST['action'];
 
     switch ($action) {
-        case 'user_add':
-            handleUserAdd();
+        case 'user_create':
+            handleUserCreate();
             break;
         case 'user_update':
             handleUserUpdate();
@@ -27,7 +27,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['action'])) {
 
     switch ($action) {
         case 'user_get':
-            handleUserGet($_GET['user_id']);
+            requestUserGet($_GET['user_id']);
             break;
     }
 }

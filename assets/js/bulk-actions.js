@@ -177,3 +177,8 @@ function updateUserRow(usersIds, callback, type = null) {
     });
 }
 
+function isUserSelected(id) {
+    return $(`.user-selection-checkbox[value="${id}"]`).is(':checked')
+}
+
+

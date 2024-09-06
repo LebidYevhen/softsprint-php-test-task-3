@@ -23,8 +23,9 @@ include_once 'includes/table/users.php'; ?>
     </div>
 
 <?php
-include_once 'includes/modal/add-user.php';
-include_once 'includes/modal/bulk-action.php';
+include_once MODAL_PATH . '/create-update-user-modal.php';
+include_once MODAL_PATH . '/delete-user-modal.php';
+include_once MODAL_PATH . '/bulk-actions-modal.php';
 ?>
 
 <?php

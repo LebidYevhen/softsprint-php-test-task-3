@@ -1,18 +1,18 @@
 <tr data-user-id="<?php echo $user['id']; ?>" class="user-table-row">
     <td class="align-middle">
         <label class="form-check-label">
-            <input class="form-check-input user-selection-checkbox" type="checkbox" name="checkBoxesArray[]"
+            <input class="form-check-input user-id user-selection-checkbox" type="checkbox" name="checkBoxesArray[]"
                    value="<?php echo $user['id']; ?>">
         </label>
     </td>
-    <td class="align-middle"><?php echo "$user[first_name] $user[last_name]"; ?></td>
-    <td class="align-middle"><?php echo $user['role_name']; ?></td>
+    <td class="align-middle user-fullname"><?php echo "$user[first_name] $user[last_name]"; ?></td>
+    <td class="align-middle user-role"><?php echo getRoleById($user['role_id'])['name']; ?></td>
     <td class="text-center align-middle">
         <span class="user-status <?php echo $user['status'] ? 'active' : ''; ?>"></span>
     </td>
     <td class="text-center align-middle">
         <div class="border border-dark rounded d-inline-block">
-            <a href="#" class="d-inline-block text-decoration-none p-1 border-end border-dark user-update-link">
+            <a href="#" class="d-inline-block text-decoration-none p-1 border-end border-dark user-update-link" data-user-create-update-action="user_update">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="grey"
                      class="bi bi-pencil-square" viewBox="0 0 16 16">
                     <path
