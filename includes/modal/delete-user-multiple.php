@@ -6,7 +6,12 @@ require_once INCLUDES_PATH . '/functions.php';
 $modalBody = 'Something went wrong.';
 
 if (isset($_POST['users_ids'])) {
-    $modalBody = sprintf('Are you sure you want to delete the users with ids:<span class="fw-bold modal-user-name"> %s</span>?', implode(', ', $_POST['users_ids']));
+    $userNames = [];
+    foreach ($_POST['users_ids'] as $id) {
+        $user = getUser($id);
+        $userNames[] = "$user[first_name] $user[last_name]";
+    }
+    $modalBody = sprintf('Are you sure you want to delete the users with ids:<span class="fw-bold modal-user-name"> %s</span>?', implode(', ', $userNames));
 }
 
 ?>
