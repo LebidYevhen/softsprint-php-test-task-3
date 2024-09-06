@@ -17,7 +17,7 @@
     <div class="mb-3">
         <label class="form-label" for="update_role">Role</label>
         <select class="form-select" aria-label="User update role select" id="update_role" name="role_id">
-            <option>-Please Select-</option>
+            <option value="">-Please Select-</option>
             <?php foreach (getUserRoles() as $role) { ?>
                 <option value="<?php echo $role['id']; ?>" <?php echo $user['role_id'] === $role['id'] ? 'selected' : ''; ?>><?php echo $role['name']; ?></option>
             <?php } ?>

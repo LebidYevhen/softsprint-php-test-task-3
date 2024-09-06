@@ -7,7 +7,7 @@ $modalBody = 'User not found.';
 if (isset($_POST['user_id'])) {
     $user = getUser($_POST['user_id']);
     if (!empty($user)) {
-        $modalBody = sprintf('Are you sure you want to delete <span class="fw-bold modal-user-name">this user: %s %s</span>?', $user['first_name'], $user['last_name']);
+        $modalBody = sprintf('Are you sure you want to delete this user: <span class="fw-bold modal-user-name">%s %s</span>?', $user['first_name'], $user['last_name']);
     }
 }
 ?>
