@@ -9,17 +9,17 @@ require_once INCLUDES_PATH . '/header.php';
 
     <div class="d-flex mb-3 gap-3">
         <?php
-        include 'includes/form/bulk-action.php'; ?>
+        include FORM_PATH . '/bulk-actions-form.php'; ?>
     </div>
 
     <div class="status-messages"></div>
 
 <?php
-include_once 'includes/table/users.php'; ?>
+include_once TABLE_PATH . '/users.php'; ?>
 
     <div class="d-flex mt-3 gap-3">
         <?php
-        include 'includes/form/bulk-action.php'; ?>
+        include FORM_PATH . '/bulk-actions-form.php'; ?>
     </div>
 
 <?php
@@ -29,4 +29,4 @@ include_once MODAL_PATH . '/bulk-actions-modal.php';
 ?>
 
 <?php
-require_once 'includes/footer.php'; ?>
+require_once INCLUDES_PATH . '/footer.php'; ?>

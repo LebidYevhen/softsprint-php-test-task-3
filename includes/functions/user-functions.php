@@ -9,9 +9,17 @@ function createUser($first_name, $last_name, $role_id, $status): int|string
         sanitizeInput($role_id),
         filter_var(sanitizeInput($status), FILTER_VALIDATE_BOOLEAN) ? 1 : 0,
     ],
-    'ssdd');
+        'ssdd');
 
     return getLastInsertedId();
+}
+
+function getUser($id)
+{
+    $query = "SELECT id, first_name, last_name, role_id, status
+              FROM users WHERE id = ? LIMIT 1";
+    $stmt = preparedQuery($query, [$id]);
+    return mysqli_fetch_assoc(getStmtResult($stmt));
 }
 
 function updateUser($id)
@@ -24,7 +32,7 @@ function updateUser($id)
         filter_var(sanitizeInput($_POST['status']), FILTER_VALIDATE_BOOLEAN) ? 1 : 0,
         $id
     ],
-    'ssddd');
+        'ssddd');
 
     return $id;
 }
@@ -35,14 +43,6 @@ function deleteUser($id)
     return preparedQuery($query, [$id]);
 }
 
-function getUser($id)
-{
-    $query = "SELECT id, first_name, last_name, role_id, status
-              FROM users WHERE id = ? LIMIT 1";
-    $stmt = preparedQuery($query, [$id]);
-    return mysqli_fetch_assoc(getStmtResult($stmt));
-}
-
 function getUsers(): array
 {
     $query = "SELECT id, first_name, last_name, role_id, status
@@ -51,16 +51,28 @@ function getUsers(): array
     return mysqli_fetch_all(getStmtResult(preparedQuery($query)), MYSQLI_ASSOC);
 }
 
-function getRoleById($id)
+function getUsersByIds(array $ids): array
 {
-    $query = "SELECT id, name FROM user_roles WHERE id = ? LIMIT 1";
-    return mysqli_fetch_assoc(getStmtResult(preparedQuery($query, [$id])));
+    $placeholders = implode(',', array_fill(0, count($ids), '?'));
+    $query = "SELECT id, first_name, last_name, role_id, status
+              FROM users
+              WHERE id IN ($placeholders)
+              ORDER BY created_at ASC";
+    return mysqli_fetch_all(getStmtResult(preparedQuery($query, $ids)), MYSQLI_ASSOC);
 }
 
-function getRoles(): array
+function updateUsersStatusMultiple(array $users_ids, int $status)
 {
-    $query = "SELECT id, name FROM user_roles";
-    return mysqli_fetch_all(getStmtResult(preparedQuery($query)), MYSQLI_ASSOC);
+    $placeholders = rtrim(str_repeat('?,', count($users_ids)), ',');
+    $query = "UPDATE users SET status = '$status' WHERE id IN ($placeholders)";
+    return preparedQuery($query, $users_ids);
+}
+
+function deleteUsersMultiple(array $users_ids)
+{
+    $placeholders = rtrim(str_repeat('?,', count($users_ids)), ',');
+    $query = "DELETE FROM users WHERE id IN ($placeholders)";
+    return preparedQuery($query, $users_ids);
 }
 
 function isUserExists($id)

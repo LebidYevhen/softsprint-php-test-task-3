@@ -26,6 +26,34 @@ function requestUserGet(int $user_id)
     die();
 }
 
+function requestUserGetMultiple($users_ids)
+{
+    $users = getUsersByIds($users_ids);
+    if (empty($users_ids) || empty($users)) {
+        $data = [
+            'status' => false,
+            'error' => [
+                'code' => 100,
+                'message' => 'Users not found.',
+            ]
+        ];
+    } else {
+        foreach ($users as &$user) {
+            $role = getRoleById($user['role_id']);
+            $user['role_name'] = $role['name'];
+        }
+
+        $data = [
+            'status' => true,
+            'error' => null,
+            'users' => $users,
+        ];
+    }
+
+    echo json_encode($data);
+    die();
+}
+
 function handleUserCreate()
 {
     $validate = validateForm([

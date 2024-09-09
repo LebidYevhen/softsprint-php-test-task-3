@@ -17,7 +17,7 @@ $user_roles = getRoles();
         <input class="form-check-input ms-0 float-none d-block" type="checkbox" role="switch" id="status"
                name="status">
     </div>
-    <div class="mb-3">
+    <div class="mb-4">
         <label class="form-label" for="role_id">Role</label>
         <select class="form-select" aria-label="User add role select" id="role_id" name="role_id">
             <option value="" selected>-Please Select-</option>

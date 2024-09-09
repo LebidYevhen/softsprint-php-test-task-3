@@ -15,11 +15,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['action'])) {
         case 'user_delete':
             handleUserDelete();
             break;
+        case 'user_delete_multiple':
+            handleUserDeleteMultiple($_POST['user_id']);
+            break;
         case 'bulk_action':
             handleBulkAction();
-            break;
-        case 'user_delete_multiple':
-            handleUserDeleteMultiple();
             break;
     }
 } elseif ($_SERVER['REQUEST_METHOD'] === "GET" && isset($_GET['action'])) {
@@ -28,6 +28,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['action'])) {
     switch ($action) {
         case 'user_get':
             requestUserGet($_GET['user_id']);
+            break;
+        case 'user_get_multiple':
+            requestUserGetMultiple($_GET['users_ids']);
             break;
     }
 }

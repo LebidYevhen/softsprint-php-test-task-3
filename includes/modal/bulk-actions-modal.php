@@ -1,10 +1,10 @@
 <!-- Bulk Action Modal -->
-<div class="modal fade" id="bulkActionModal" tabindex="-1" aria-labelledby="bulkActionModalLabel"
+<div class="modal fade" id="bulkActionsModal" tabindex="-1" aria-labelledby="bulkActionsModalLabel"
      aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h2 class="modal-title fs-5" id="bulkActionModalLabel">Warning</h2>
+        <h2 class="modal-title fs-5" id="bulkActionsModalLabel">Warning</h2>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cancel"></button>
       </div>
       <div class="modal-body"></div>

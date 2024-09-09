@@ -2,62 +2,70 @@
 
 function handleBulkAction(): void
 {
-    if (isset($_POST['bulk_action'])) {
-        $data = [
-            'status' => true,
-            'code' => 200,
-            'error' => null,
-        ];
+    if (isset($_POST['bulk_action']) && !empty($_POST['users_ids'])) {
+        $usersIds = explode(',', $_POST['users_ids']);
 
         switch ($_POST['bulk_action']) {
-            case 'delete':
-                usersDeleteMultiple($_POST['users_ids']);
-                echo json_encode($data);
-                break;
             case 'set_active':
-                usersStatusMultiple($_POST['users_ids'], 1);
-                echo json_encode($data);
+                updateUsersStatusMultiple($usersIds, 1);
                 break;
             case 'set_not_active':
-                usersStatusMultiple($_POST['users_ids'], 0);
-                echo json_encode($data);
+                updateUsersStatusMultiple($usersIds, 0);
                 break;
         }
+
+        $users = getUsersByIds($usersIds);
+        $usersFullNames = array_map(function ($user) {
+            return $user['first_name'] . ' ' . $user['last_name'];
+        }, $users);
+        foreach ($users as &$user) {
+            $role = getRoleById($user['role_id']);
+            $user['role_name'] = $role['name'];
+        }
+        $data = [
+            'status' => true,
+            'error' => null,
+            'users' => $users,
+            'success' => [
+                'code' => 200,
+                'message' => 'Users roles ' . implode(', ', $usersFullNames) . ' changed successfully.',
+            ]
+
+        ];
+
+        echo json_encode($data);
+        die;
     }
 }
 
-function handleUserDeleteMultiple(): void
+function handleUserDeleteMultiple($user_id): void
 {
-    if (isset($_POST['users_ids'])) {
-        $usersIds = explode(',', $_POST['users_ids']);
-        usersDeleteMultiple($usersIds);
+    if (!empty($user_id)) {
+        $usersIds = explode(',', $user_id);
+        $users = getUsersByIds($usersIds);
+        $usersFullNames = array_map(function ($user) {
+            return $user['first_name'] . ' ' . $user['last_name'];
+        }, $users);
+
+        deleteUsersMultiple($usersIds);
         $data = [
             'status' => true,
-            'code' => 200,
             'error' => null,
-            'users_ids' => $usersIds,
+            'users' => $users,
+            'success' => [
+                'code' => 200,
+                'message' => 'Users ' . implode(', ', $usersFullNames) . ' deleted successfully.',
+            ]
         ];
     } else {
         $data = [
             'status' => false,
-            'code' => 100,
-            'error' => 'No users ids provided.',
+            'error' => [
+                'code' => 100,
+                'error' => 'No users ids provided.',
+            ],
         ];
     }
 
     echo json_encode($data);
-}
-
-function usersDeleteMultiple(array $users_ids)
-{
-    $placeholders = rtrim(str_repeat('?,', count($users_ids)), ',');
-    $query = "DELETE FROM users WHERE id IN ($placeholders)";
-    return preparedQuery($query, $users_ids);
-}
-
-function usersStatusMultiple(array $users_ids, int $status)
-{
-    $placeholders = rtrim(str_repeat('?,', count($users_ids)), ',');
-    $query = "UPDATE users SET status = '$status' WHERE id IN ($placeholders)";
-    return preparedQuery($query, $users_ids);
 }

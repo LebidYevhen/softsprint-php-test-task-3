@@ -9,3 +9,7 @@
 .user-status.active {
     background-color: green;
 }
+
+.user-create-update-form .modal-footer {
+    margin: 0 -1rem;
+}

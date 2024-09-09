@@ -13,10 +13,8 @@ function handleUserCreateUpdate() {
 
     userCreateUpdateModalOpen(userCreateUpdateForm, userCreateUpdateModal);
     userCreateUpdateModalClose(userCreateUpdateForm, userCreateUpdateModal);
-    userCreateUpdateForm.submit(function (e) {
-        e.preventDefault();
-        submitUserCreateUpdateForm($(this));
-    });
+
+    submitUserCreateUpdateForm(userCreateUpdateForm);
 }
 
 function handleUserDelete() {
@@ -40,68 +38,78 @@ function handleUserDelete() {
         userDeleteModalOpen(userDeleteModal, userDeleteForm, response.user);
     });
 
-
-    userDeleteForm.submit(function (e) {
-        e.preventDefault();
-        submitUserDeleteForm(userDeleteForm);
-    });
+    submitUserDeleteForm();
 }
 
 function submitUserCreateUpdateForm(form) {
+    $('.user-create-update-form').submit(function (e) {
+        e.preventDefault();
+        const formData = extractFormData(form, ['user_id', 'action', 'first_name', 'last_name', 'role_id']);
+        formData.status = form.find("[name='status']").is(':checked');
 
-    const formData = extractFormData(form, ['user_id', 'action', 'first_name', 'last_name', 'role_id']);
-    formData.status = form.find("[name='status']").is(':checked');
+        clearFormErrors(form);
 
-    ajaxRequest(
-        '/includes/process-request.php',
-        formData,
-        function (response) {
-            if (!response.status) {
-                highlightFormErrors(form, response.error);
-            } else {
-                form.trigger('reset');
-                addStatusMessage(response.success.message, 'alert-success');
-                switch (formData.action) {
-                    case 'user_create':
-                        $('.users-table').find('tbody').append(getUserRow(response.user));
-                        $('.select-all-users-checkbox').prop('checked', false);
-                        break;
-                    case 'user_update':
-                        replaceUserRow(response.user);
-                        break;
+        ajaxRequest(
+            '/includes/process-request.php',
+            formData,
+            function (response) {
+                if (!response.status) {
+                    highlightFormErrors(form, response.error);
+                } else {
+                    form.trigger('reset');
+                    addStatusMessage(response.success.message, 'alert-success');
+                    switch (formData.action) {
+                        case 'user_create':
+                            $('.users-table').find('tbody').append(getUserRow(response.user));
+                            $('.select-all-users-checkbox').prop('checked', false);
+                            break;
+                        case 'user_update':
+                            replaceUserRow(response.user);
+                            break;
+                    }
+                    modalHide($('#userCreateUpdateModal'));
                 }
-                modalHide($('#userCreateUpdateModal'));
-            }
-        },
-        function (xhr, status) {
-            addStatusMessage('Could not reach server, please try again later.', 'alert-danger', '.user-create-update-form', 'prepend');
-        },
-    )
+            },
+            function (xhr, status) {
+                addStatusMessage('Could not reach server, please try again later.', 'alert-danger', '.user-create-update-form', 'prepend');
+            },
+        )
+    });
 }
 
-function submitUserDeleteForm(form) {
-    const deleteUserModal = $('#userDeleteModal');
+function submitUserDeleteForm() {
+    $('.user-delete-form').submit(function (e) {
+        e.preventDefault();
+        const deleteUserModal = $('#userDeleteModal');
 
-    const formData = extractFormData(form, ['action', 'user_id']);
+        const formData = extractFormData($(this), ['action', 'user_id']);
 
-    ajaxRequest(
-        '/includes/process-request.php',
-        formData,
-        function (response) {
-            if (!response.status) {
+        ajaxRequest(
+            '/includes/process-request.php',
+            formData,
+            function (response) {
+                if (!response.status) {
+                    modalHide(deleteUserModal);
+                    addStatusMessage(response.error.message, 'alert-danger');
+                } else {
+                    if (formData.action === 'user_delete') {
+                        removeUserRow(response.user.id);
+                    }
+                    if (formData.action === 'user_delete_multiple') {
+                        response.users.forEach(user => {
+                            removeUserRow(user.id);
+                        })
+                    }
+
+                    addStatusMessage(response.success.message, 'alert-success');
+                    modalHide(deleteUserModal);
+                }
+            },
+            function (xhr, status) {
                 modalHide(deleteUserModal);
-                addStatusMessage(response.error.message, 'alert-danger');
-            } else {
-                modalHide(deleteUserModal);
-                addStatusMessage(response.success.message, 'alert-success');
-                removeUserRow(response.user.id);
-            }
-        },
-        function (xhr, status) {
-            modalHide(deleteUserModal);
-            addStatusMessage('Could not reach server, please try again later.', 'alert-danger');
-        });
-
+                addStatusMessage('Could not reach server, please try again later.', 'alert-danger');
+            });
+    });
 }
 
 function userCreateUpdateModalOpen(userCreateUpdateForm, userCreateUpdateModal) {
@@ -159,7 +167,8 @@ function handleUserUpdateModalOpen(userCreateUpdateForm, userCreateUpdateModal, 
 
 function userDeleteModalOpen(userDeleteModal, userDeleteForm, user) {
     setInputValue(getFormInputByName(userDeleteForm, 'user_id'), user.id);
-    userDeleteModal.find('.modal-body').html(`Are you sure you want to delete <span class="fw-bold modal-user-name">${user.first_name} ${user.last_name}</span>?`);
+    setInputValue(getFormInputByName(userDeleteForm, 'action'), 'user_delete');
+    userDeleteModal.find('.modal-body').html(`Are you sure you want to delete user <span class="fw-bold modal-user-name">${user.first_name} ${user.last_name}</span>?`);
     userDeleteModal.modal('show');
 }
 
@@ -167,16 +176,17 @@ function userDeleteModalClose(userDeleteForm, userDeleteModal) {
     userDeleteModal.on('hidden.bs.modal', function (e) {
         userDeleteForm.trigger('reset');
         setInputValue(getFormInputByName(userDeleteForm, 'user_id'), '');
+        setInputValue(getFormInputByName(userDeleteForm, 'action'), '');
     })
 }
 
 function getUserResponse(user_id) {
-    let tmp = null;
+    let user = null;
     ajaxRequest(
         '/includes/process-request.php',
         {action: 'user_get', user_id,},
         function (response) {
-            tmp = response;
+            user = response;
         },
         function (xhr, status) {
             addStatusMessage('Could not reach server, please try again later.', 'alert-danger');
@@ -186,7 +196,7 @@ function getUserResponse(user_id) {
         false
     );
 
-    return tmp;
+    return user;
 }
 
 function getUserRow(user) {
@@ -242,4 +252,8 @@ function replaceUserRow(user) {
 
 function removeUserRow(userId) {
     $('.users-table').find(`.user-table-row[data-user-id='${userId}']`).remove();
+}
+
+function isUserSelected(id) {
+    return $(`.user-selection-checkbox[value="${id}"]`).is(':checked')
 }
