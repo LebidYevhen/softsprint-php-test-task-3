@@ -1,57 +1,28 @@
 <?php
 
-function requestUserGet(int $user_id)
+function requestUserGet($userId)
 {
-    $user = getUser($user_id);
+    $user = getUser($userId);
 
     if ($user) {
-        $role = getRoleById($user['role_id']);
-        $user['role_name'] = $role['name'];
         $data = [
             'status' => true,
             'error' => null,
             'user' => $user,
         ];
-    } else {
-        $data = [
-            'status' => false,
-            'error' => [
-                'code' => 100,
-                'message' => 'User not found.',
-            ]
-        ];
+
+        handleJsonOutput($data);
     }
 
-    echo json_encode($data);
-    die();
-}
+    $data = [
+        'status' => false,
+        'error' => [
+            'code' => 100,
+            'message' => 'User not found.',
+        ]
+    ];
 
-function requestUserGetMultiple($users_ids)
-{
-    $users = getUsersByIds($users_ids);
-    if (empty($users_ids) || empty($users)) {
-        $data = [
-            'status' => false,
-            'error' => [
-                'code' => 100,
-                'message' => 'Users not found.',
-            ]
-        ];
-    } else {
-        foreach ($users as &$user) {
-            $role = getRoleById($user['role_id']);
-            $user['role_name'] = $role['name'];
-        }
-
-        $data = [
-            'status' => true,
-            'error' => null,
-            'users' => $users,
-        ];
-    }
-
-    echo json_encode($data);
-    die();
+    handleJsonOutput($data);
 }
 
 function handleUserCreate()
@@ -78,22 +49,7 @@ function handleUserCreate()
         ],
     ]);
 
-
-    if (empty($validate)) {
-        $userId = createUser($_POST['first_name'], $_POST['last_name'], $_POST['role_id'], $_POST['status']);
-        $user = getUser($userId);
-        $role = getRoleById($user['role_id']);
-        $user['role_name'] = $role['name'];
-        $data = [
-            'status' => true,
-            'error' => null,
-            'success' => [
-                'code' => 200,
-                'message' => "User $user[first_name] $user[last_name] created successfully.",
-            ],
-            'user' => $user,
-        ];
-    } else {
+    if (!empty($validate)) {
         $data = [
             'status' => false,
             'error' => [
@@ -102,13 +58,26 @@ function handleUserCreate()
                 'fields' => $validate,
             ],
         ];
+
+        handleJsonOutput($data);
     }
 
-    echo json_encode($data);
-    die;
+    $userId = createUser(
+        sanitizeInput($_POST['first_name']),
+        sanitizeInput($_POST['last_name']),
+        sanitizeInput($_POST['role_id']),
+        filter_var(sanitizeInput($_POST['status']), FILTER_VALIDATE_BOOLEAN) ? 1 : 0
+    );
+    $data = [
+        'status' => true,
+        'error' => null,
+        'user' => getUser($userId),
+    ];
+
+    handleJsonOutput($data);
 }
 
-function handleUserUpdate(): void
+function handleUserUpdate($userId, $firstName, $lastName, $roleId, $status): void
 {
     $validate = validateForm([
         'first_name' => [
@@ -132,7 +101,7 @@ function handleUserUpdate(): void
         ],
     ]);
 
-    if (!isset($_POST['user_id']) || !isUserExists($_POST['user_id'])) {
+    if (!isset($_POST['user_id'])) {
         $data = [
             'status' => false,
             'error' => [
@@ -140,38 +109,37 @@ function handleUserUpdate(): void
                 'message' => 'User not found.',
             ],
         ];
-    } elseif (empty($validate)) {
-        $userId = updateUser($_POST['user_id']);
-        $user = getUser($userId);
-        $role = getRoleById($user['role_id']);
-        $user['role_name'] = $role['name'];
+
+        handleJsonOutput($data);
+    }
+
+
+    if (empty($validate)) {
+        $userId = updateUser($userId, $firstName, $lastName, $roleId, $status);
         $data = [
             'status' => true,
             'error' => null,
-            'success' => [
-                'code' => 200,
-                'message' => "User $user[first_name] $user[last_name] updated successfully.",
-            ],
-            'user' => $user,
+            'user' => getUser($userId),
         ];
-    } else {
-        $data = [
-            'status' => false,
-            'error' => [
-                'code' => 400,
-                'message' => 'Validation Error.',
-                'fields' => $validate,
-            ],
-        ];
+
+        handleJsonOutput($data);
     }
 
-    echo json_encode($data);
-    die;
+    $data = [
+        'status' => false,
+        'error' => [
+            'code' => 400,
+            'message' => 'Validation Error.',
+            'fields' => $validate,
+        ],
+    ];
+
+    handleJsonOutput($data);
 }
 
-function handleUserDelete(): void
+function handleUserDelete($userId): void
 {
-    if (!isset($_POST['user_id']) || !isUserExists($_POST['user_id'])) {
+    if (empty($userId) || !isUserExists($userId)) {
         $data = [
             'status' => false,
             'error' => [
@@ -179,21 +147,23 @@ function handleUserDelete(): void
                 'message' => 'User not found.',
             ],
         ];
-    } else {
-        $user = getUser($_POST['user_id']);
-        deleteUser($_POST['user_id']);
-        $data = [
-            'status' => true,
-            'code' => 200,
-            'error' => null,
-            'success' => [
-                'code' => 200,
-                'message' => "User $user[first_name] $user[last_name] deleted successfully.",
-            ],
-            'user' => $user,
-        ];
-    }
 
+        handleJsonOutput($data);
+    }
+    $data = [
+        'status' => true,
+        'code' => 200,
+        'error' => null,
+        'user' => getUser($userId),
+    ];
+
+    deleteUser($userId);
+
+    handleJsonOutput($data);
+}
+
+function handleJsonOutput(array $data): void
+{
     echo json_encode($data);
     die;
 }

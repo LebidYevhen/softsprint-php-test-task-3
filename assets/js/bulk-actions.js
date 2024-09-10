@@ -29,18 +29,21 @@ function submitBulkActionsForm() {
                 function (response) {
                     if (!response.status) {
                         addStatusMessage(response.error.message, 'alert-danger');
-                    } else {
-                        $(this).trigger('reset');
-                        const users = response.users;
-                        users.forEach(user => {
-                            replaceUserRow(user);
-                        })
-
-                        addStatusMessage(response.success.message, 'alert-success');
+                        return;
                     }
+
+                    const status = formData.bulk_action === 'set_active' ? 'active' : '';
+
+                    usersIds.forEach(userId => {
+                        changeUserRowStatusClass(userId, status);
+                        changeUserRoleName()
+                    });
+
+                    addStatusMessage('User statuses have been successfully changed.', 'alert-success');
 
                     setInputValue(getFormInputByName($(this), 'users_ids'), '');
                     $('.user-selection-checkbox, .select-all-users-checkbox').prop('checked', false);
+                    $(this).trigger('reset');
                 },
                 function (xhr, status) {
                     console.error("Error fetching modal content:", status);
@@ -54,6 +57,11 @@ function handleBulkActionsFormValidation(form) {
     const bulkAction = form.find('.bulk-actions-select').val();
     const selectedUsers = $('.user-selection-checkbox:checked').length;
     const bulkActionModal = $('#bulkActionsModal');
+
+    if (!bulkAction && selectedUsers === 0) {
+        bulkActionModal.modal('show').find('.modal-body').html('No action and no users were selected.');
+        return false;
+    }
 
     if (!bulkAction && selectedUsers > 0) {
         bulkActionModal.modal('show').find('.modal-body').html('No action selected.');
@@ -74,34 +82,10 @@ function handleBulkActionsFormValidation(form) {
 }
 
 function bulkActionsUserDeleteModalOpen(userDeleteForm, userDeleteModal, usersIds) {
-    const usersResponse = getUserMultipleResponse(usersIds);
-    const usersFullName = usersResponse.users.map(user => {
-        return `${user.first_name} ${user.last_name}`;
-    });
-
     setInputValue(getFormInputByName(userDeleteForm, 'user_id'), usersIds);
     setInputValue(getFormInputByName(userDeleteForm, 'action'), 'user_delete_multiple');
-    userDeleteModal.find('.modal-body').html(`Are you sure you want to delete users <span class="fw-bold modal-user-name">${usersFullName.join(', ')}</span>?`);
+    userDeleteModal.find('.modal-body').html('Are you sure you want to delete these users?');
     userDeleteModal.modal('show');
-}
-
-function getUserMultipleResponse(users_ids) {
-    let users = null;
-    ajaxRequest(
-        '/includes/process-request.php',
-        {action: 'user_get_multiple', users_ids,},
-        function (response) {
-            users = response;
-        },
-        function (xhr, status) {
-            addStatusMessage('Could not reach server, please try again later.', 'alert-danger');
-        },
-        'GET',
-        'json',
-        false
-    );
-
-    return users;
 }
 
 function selectAllUsers() {

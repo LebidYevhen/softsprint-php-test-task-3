@@ -1,4 +1,4 @@
-.user-status {
+.user-status-indicator {
     display: inline-block;
     width: 1rem;
     height: 1rem;
@@ -6,10 +6,6 @@
     background-color: gray;
 }
 
-.user-status.active {
+.user-status.active .user-status-indicator {
     background-color: green;
-}
-
-.user-create-update-form .modal-footer {
-    margin: 0 -1rem;
 }

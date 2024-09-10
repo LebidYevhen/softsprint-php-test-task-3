@@ -7,8 +7,8 @@
     </td>
     <td class="align-middle user-fullname"><?php echo "$user[first_name] $user[last_name]"; ?></td>
     <td class="align-middle user-role"><?php echo getRoleById($user['role_id'])['name']; ?></td>
-    <td class="text-center align-middle">
-        <span class="user-status <?php echo $user['status'] ? 'active' : ''; ?>"></span>
+    <td class="text-center align-middle user-status <?php echo $user['status'] ? 'active' : ''; ?>">
+        <span class="user-status-indicator"></span>
     </td>
     <td class="text-center align-middle">
         <div class="border border-dark rounded d-inline-block">

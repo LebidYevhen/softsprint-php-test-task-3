@@ -1,13 +1,13 @@
 <?php
 
-function createUser($first_name, $last_name, $role_id, $status): int|string
+function createUser($firstName, $lastName, $roleId, $status): int|string
 {
     $query = "INSERT INTO users (first_name, last_name, role_id, status) VALUES (?, ?, ?, ?)";
     preparedQuery($query, [
-        sanitizeInput($first_name),
-        sanitizeInput($last_name),
-        sanitizeInput($role_id),
-        filter_var(sanitizeInput($status), FILTER_VALIDATE_BOOLEAN) ? 1 : 0,
+        $firstName,
+        $lastName,
+        $roleId,
+        $status,
     ],
         'ssdd');
 
@@ -22,16 +22,10 @@ function getUser($id)
     return mysqli_fetch_assoc(getStmtResult($stmt));
 }
 
-function updateUser($id)
+function updateUser($id, $firstName, $lastName, $roleId, $status)
 {
     $query = "UPDATE users SET first_name = ?, last_name = ?, role_id = ?, status = ? WHERE id = ?";
-    preparedQuery($query, [
-        sanitizeInput($_POST['first_name']),
-        sanitizeInput($_POST['last_name']),
-        sanitizeInput($_POST['role_id']),
-        filter_var(sanitizeInput($_POST['status']), FILTER_VALIDATE_BOOLEAN) ? 1 : 0,
-        $id
-    ],
+    preparedQuery($query, [$firstName, $lastName, $roleId, $status, $id],
         'ssddd');
 
     return $id;
@@ -49,16 +43,6 @@ function getUsers(): array
               FROM users
               ORDER BY created_at ASC";
     return mysqli_fetch_all(getStmtResult(preparedQuery($query)), MYSQLI_ASSOC);
-}
-
-function getUsersByIds(array $ids): array
-{
-    $placeholders = implode(',', array_fill(0, count($ids), '?'));
-    $query = "SELECT id, first_name, last_name, role_id, status
-              FROM users
-              WHERE id IN ($placeholders)
-              ORDER BY created_at ASC";
-    return mysqli_fetch_all(getStmtResult(preparedQuery($query, $ids)), MYSQLI_ASSOC);
 }
 
 function updateUsersStatusMultiple(array $users_ids, int $status)

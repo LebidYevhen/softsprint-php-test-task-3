@@ -24,10 +24,9 @@ function ajaxRequest(url, data, success, error, type = 'POST', dataType = 'json'
 }
 
 function highlightFormErrors(form, errors) {
-    $.each(errors.fields, function (field, message) {
-        form.find(`[name='${field}']`).after(`<p class="text-danger">${message}</p>`).addClass('border-danger');
+    $.each(errors.fields, function (index, {fieldName, fieldValue, message}) {
+        form.find(`[name='${fieldName}']`).after(`<p class="text-danger">${message}</p>`).addClass('border-danger');
     });
-    addStatusMessage(errors.message, 'alert-danger', '.user-create-update-form', 'prepend', false, false);
 }
 
 function clearFormErrors(form) {

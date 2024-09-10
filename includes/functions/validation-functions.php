@@ -24,7 +24,11 @@ function validateForm($fields = []): array
             $isValid = $validationRules[$ruleName]['validate']($fieldValue, ...$ruleParams);
 
             if (!$isValid) {
-                $errors[$fieldName] = $validationRules[$ruleName]['message'];
+                $errors[] = [
+                    'fieldName' => $fieldName,
+                    'fieldValue' => $fieldValue,
+                    'message' => $validationRules[$ruleName]['message'],
+                ];
                 break;
             }
         }
@@ -38,11 +42,11 @@ function getValidationRules(): array
     return [
         'required' => [
             'validate' => fn($value) => !empty($value),
-            'message' => 'This field is required.'
+            'message' => 'This field is required.',
         ],
         'exists' => [
             'validate' => fn($value, $table, $column) => isValueInTableExists($value, $table, $column),
-            'message' => 'The selected value does not exist.'
+            'message' => 'The selected value does not exist.',
         ],
     ];
 }

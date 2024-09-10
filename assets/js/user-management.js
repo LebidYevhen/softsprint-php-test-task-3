@@ -21,7 +21,7 @@ function handleUserDelete() {
     const userDeleteModal = $('#userDeleteModal');
     const userDeleteForm = $('.user-delete-form');
 
-    userDeleteModalClose(userDeleteForm, userDeleteModal);
+    handleUserDeleteModalClose(userDeleteForm, userDeleteModal);
 
     $('.users-table').on('click', '.user-delete-link', function (e) {
         e.preventDefault();
@@ -35,7 +35,7 @@ function handleUserDelete() {
             return;
         }
 
-        userDeleteModalOpen(userDeleteModal, userDeleteForm, response.user);
+        handleUserDeleteModalOpen(userDeleteModal, userDeleteForm, response.user);
     });
 
     submitUserDeleteForm();
@@ -55,18 +55,21 @@ function submitUserCreateUpdateForm(form) {
             function (response) {
                 if (!response.status) {
                     highlightFormErrors(form, response.error);
+                    addStatusMessage(response.error.message, 'alert-danger', '.user-create-update-form .modal-body', 'prepend', false, false);
                 } else {
-                    form.trigger('reset');
-                    addStatusMessage(response.success.message, 'alert-success');
+                    response.user.role_name = getSelectRoleNameById(response.user.role_id);
                     switch (formData.action) {
                         case 'user_create':
-                            $('.users-table').find('tbody').append(getUserRow(response.user));
+                            addUserRow(response.user);
                             $('.select-all-users-checkbox').prop('checked', false);
+                            addStatusMessage('User successfully created.', 'alert-success');
                             break;
                         case 'user_update':
                             replaceUserRow(response.user);
+                            addStatusMessage('User successfully updated.', 'alert-success');
                             break;
                     }
+                    form.trigger('reset');
                     modalHide($('#userCreateUpdateModal'));
                 }
             },
@@ -83,7 +86,6 @@ function submitUserDeleteForm() {
         const deleteUserModal = $('#userDeleteModal');
 
         const formData = extractFormData($(this), ['action', 'user_id']);
-
         ajaxRequest(
             '/includes/process-request.php',
             formData,
@@ -94,14 +96,15 @@ function submitUserDeleteForm() {
                 } else {
                     if (formData.action === 'user_delete') {
                         removeUserRow(response.user.id);
+                        addStatusMessage('The user has been successfully deleted.', 'alert-success');
                     }
                     if (formData.action === 'user_delete_multiple') {
-                        response.users.forEach(user => {
-                            removeUserRow(user.id);
-                        })
+                        response.users_ids.forEach(userId => {
+                            removeUserRow(userId);
+                        });
+                        addStatusMessage('Users have been successfully deleted.', 'alert-success');
                     }
 
-                    addStatusMessage(response.success.message, 'alert-success');
                     modalHide(deleteUserModal);
                 }
             },
@@ -165,14 +168,14 @@ function handleUserUpdateModalOpen(userCreateUpdateForm, userCreateUpdateModal, 
     userCreateUpdateModal.modal('show');
 }
 
-function userDeleteModalOpen(userDeleteModal, userDeleteForm, user) {
+function handleUserDeleteModalOpen(userDeleteModal, userDeleteForm, user) {
     setInputValue(getFormInputByName(userDeleteForm, 'user_id'), user.id);
     setInputValue(getFormInputByName(userDeleteForm, 'action'), 'user_delete');
-    userDeleteModal.find('.modal-body').html(`Are you sure you want to delete user <span class="fw-bold modal-user-name">${user.first_name} ${user.last_name}</span>?`);
+    userDeleteModal.find('.modal-body').html('Are you sure you want to delete the user?');
     userDeleteModal.modal('show');
 }
 
-function userDeleteModalClose(userDeleteForm, userDeleteModal) {
+function handleUserDeleteModalClose(userDeleteForm, userDeleteModal) {
     userDeleteModal.on('hidden.bs.modal', function (e) {
         userDeleteForm.trigger('reset');
         setInputValue(getFormInputByName(userDeleteForm, 'user_id'), '');
@@ -199,7 +202,11 @@ function getUserResponse(user_id) {
     return user;
 }
 
-function getUserRow(user) {
+function addUserRow(user) {
+    $('.users-table').find('tbody').append(getUserRowHtml(user));
+}
+
+function getUserRowHtml(user) {
     return $(`
     <tr data-user-id="${user.id}" class="user-table-row">
         <td class="align-middle">
@@ -210,8 +217,8 @@ function getUserRow(user) {
         </td>
         <td class="align-middle user-fullname">${user.first_name} ${user.last_name}</td>
         <td class="align-middle user-role">${user.role_name}</td>
-        <td class="text-center align-middle">
-            <span class="user-status ${user.status ? 'active' : ''}"></span>
+        <td class="text-center align-middle user-status ${user.status ? 'active' : ''}">
+            <span class="user-status-indicator"></span>
         </td>
         <td class="text-center align-middle">
             <div class="border border-dark rounded d-inline-block">
@@ -240,12 +247,16 @@ function getUserRow(user) {
     `);
 }
 
+function getUserRow(userId) {
+    return $('.users-table').find(`.user-table-row[data-user-id='${userId}']`);
+}
+
 function replaceUserRow(user) {
     let usersTable = $('.users-table');
-    let userRow = usersTable.find(`.user-table-row[data-user-id='${user.id}']`);
+    let userRow = getUserRow(user.id);
     let userCheckboxVal = isUserSelected(user.id);
 
-    userRow.replaceWith(getUserRow(user));
+    userRow.replaceWith(getUserRowHtml(user));
     let checkbox = usersTable.find(`.user-selection-checkbox[value='${user.id}']`);
     checkbox.prop('checked', userCheckboxVal);
 }
@@ -254,6 +265,20 @@ function removeUserRow(userId) {
     $('.users-table').find(`.user-table-row[data-user-id='${userId}']`).remove();
 }
 
+function changeUserRowStatusClass(userId, status) {
+    const userRow = getUserRow(userId);
+    const userStatusEl =  userRow.find('.user-status');
+    status === 'active' ? userStatusEl.addClass('active') : userStatusEl.removeClass('active');
+}
+
+function changeUserRoleName(userId, roleName) {
+    getUserRow(userId).find('.user-role').text(roleName);
+}
+
 function isUserSelected(id) {
     return $(`.user-selection-checkbox[value="${id}"]`).is(':checked')
+}
+
+function getSelectRoleNameById(id) {
+    return $('#role_id').find(`option[value=${id}]`).text();
 }

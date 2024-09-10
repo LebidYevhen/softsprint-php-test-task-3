@@ -3,34 +3,63 @@
 require_once 'functions.php';
 
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['action'])) {
-    $action = $_POST['action'];
+    $action = sanitizeInput($_POST['action']);
+    $userId = isset($_POST['user_id']) ? sanitizeInput($_POST['user_id']) : null;
 
     switch ($action) {
         case 'user_create':
             handleUserCreate();
             break;
         case 'user_update':
-            handleUserUpdate();
+            $firstName = isset($_POST['first_name']) ? sanitizeInput($_POST['first_name']) : null;
+            $lastName = isset($_POST['last_name']) ? sanitizeInput($_POST['last_name']) : null;
+            $roleId = isset($_POST['role_id']) ? sanitizeInput($_POST['role_id']) : null;
+            $status = isset($_POST['status']) ? sanitizeInput($_POST['status']) : null;
+
+            handleUserUpdate(
+                $userId,
+                $firstName,
+                $lastName,
+                $roleId,
+                filter_var(sanitizeInput($_POST['status']), FILTER_VALIDATE_BOOLEAN) ? 1 : 0
+            );
             break;
         case 'user_delete':
-            handleUserDelete();
+            handleUserDelete($userId);
             break;
         case 'user_delete_multiple':
-            handleUserDeleteMultiple($_POST['user_id']);
+            handleUserDeleteMultiple($userId);
             break;
         case 'bulk_action':
-            handleBulkAction();
+            $bulkAction = isset($_POST['bulk_action']) ? sanitizeInput($_POST['bulk_action']) : null;
+            $usersIds = isset($_POST['users_ids']) ? sanitizeInput($_POST['users_ids']) : null;
+
+            handleBulkAction($bulkAction, $usersIds);
             break;
+        default:
+            invalidActionHandler();
     }
 } elseif ($_SERVER['REQUEST_METHOD'] === "GET" && isset($_GET['action'])) {
-    $action = $_GET['action'];
+    $action = sanitizeInput($_GET['action']);
 
     switch ($action) {
         case 'user_get':
-            requestUserGet($_GET['user_id']);
+            $userId = isset($_GET['user_id']) ? sanitizeInput($_GET['user_id']) : null;
+
+            requestUserGet($userId);
             break;
-        case 'user_get_multiple':
-            requestUserGetMultiple($_GET['users_ids']);
-            break;
+        default:
+            invalidActionHandler();
     }
+}
+
+function invalidActionHandler()
+{
+    handleJsonOutput([
+        'status' => false,
+        'error' => [
+            'code' => 400,
+            'message' => 'Invalid action.',
+        ]
+    ]);
 }
