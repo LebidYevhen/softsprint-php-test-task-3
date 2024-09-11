@@ -34,7 +34,7 @@ $user_roles = getRoles();
                             <option value="" selected>-Please Select-</option>
                             <?php
                             foreach ($user_roles as $role) {
-                                echo sprintf('<option value="%s">%s</option>', $role['id'], $role['name']);
+                                echo sprintf('<option value="%s" data-role-name="%s">%s</option>', $role['id'], $role['name'], $role['name']);
                             } ?>
                         </select>
                     </div>

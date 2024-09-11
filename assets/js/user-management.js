@@ -27,7 +27,7 @@ function handleUserDelete() {
         e.preventDefault();
 
         const userTableRow = $(this).closest('.user-table-row')
-        const userId = userTableRow.attr('data-user-id');
+        const userId = userTableRow.data('userId');
         const response = getUserResponse(userId);
 
         if (!response.status) {
@@ -126,7 +126,7 @@ function userCreateUpdateModalOpen(userCreateUpdateForm, userCreateUpdateModal) 
                 break;
             case 'user_update':
                 const userTableRow = $(this).closest('.user-table-row')
-                const userId = userTableRow.attr('data-user-id');
+                const userId = userTableRow.data('userId');
 
                 const response = getUserResponse(userId);
                 if (!response.status) {
@@ -280,5 +280,5 @@ function isUserSelected(id) {
 }
 
 function getSelectRoleNameById(id) {
-    return $('#role_id').find(`option[value=${id}]`).text();
+    return $('#role_id').find(`option[value=${id}]`).data('roleName');
 }

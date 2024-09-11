@@ -36,7 +36,7 @@ function submitBulkActionsForm() {
 
                     usersIds.forEach(userId => {
                         changeUserRowStatusClass(userId, status);
-                        changeUserRoleName()
+                        changeUserRoleName();
                     });
 
                     addStatusMessage('User statuses have been successfully changed.', 'alert-success');
