@@ -44,7 +44,7 @@ function handleUserDelete() {
 function submitUserCreateUpdateForm(form) {
     $('.user-create-update-form').submit(function (e) {
         e.preventDefault();
-        const formData = extractFormData(form, ['user_id', 'action', 'first_name', 'last_name', 'role_id']);
+        const formData = extractFormData(form, ['id', 'action', 'first_name', 'last_name', 'role_id']);
         formData.status = form.find("[name='status']").is(':checked');
 
         clearFormErrors(form);
@@ -85,7 +85,7 @@ function submitUserDeleteForm() {
         e.preventDefault();
         const deleteUserModal = $('#userDeleteModal');
 
-        const formData = extractFormData($(this), ['action', 'user_id']);
+        const formData = extractFormData($(this), ['action', 'id']);
         ajaxRequest(
             '/includes/process-request.php',
             formData,
@@ -150,8 +150,7 @@ function userCreateUpdateModalClose(userCreateUpdateForm, userCreateUpdateModal)
 
         setInputValue(getFormInputByName(userCreateUpdateForm, 'action'), '');
 
-        deleteHiddenInput(userCreateUpdateForm, 'user_id');
-        setInputValue(getFormInputByName(userCreateUpdateForm, 'user_id'), '');
+        deleteHiddenInput(userCreateUpdateForm, 'id');
 
         userCreateUpdateForm.find("button[type='submit']").text('');
     })
@@ -168,15 +167,15 @@ function handleUserUpdateModalOpen(userCreateUpdateForm, userCreateUpdateModal, 
     userCreateUpdateModal.find('.modal-title').html(modalTitle);
     setInputValue(getFormInputByName(userCreateUpdateForm, 'action'), action);
 
-    createHiddenInput(userCreateUpdateForm, 'user_id');
-    setInputValue(getFormInputByName(userCreateUpdateForm, 'user_id'), userId);
+    createHiddenInput(userCreateUpdateForm, 'id');
+    setInputValue(getFormInputByName(userCreateUpdateForm, 'id'), userId);
 
     userCreateUpdateForm.find("button[type='submit']").text(submitText);
     userCreateUpdateModal.modal('show');
 }
 
 function handleUserDeleteModalOpen(userDeleteModal, userDeleteForm, user) {
-    setInputValue(getFormInputByName(userDeleteForm, 'user_id'), user.id);
+    setInputValue(getFormInputByName(userDeleteForm, 'id'), user.id);
     setInputValue(getFormInputByName(userDeleteForm, 'action'), 'user_delete');
     userDeleteModal.find('.modal-body').html(`Are you sure you want to delete user <b>${user.first_name} ${user.last_name}</b>?`);
     userDeleteModal.modal('show');
@@ -185,16 +184,16 @@ function handleUserDeleteModalOpen(userDeleteModal, userDeleteForm, user) {
 function handleUserDeleteModalClose(userDeleteForm, userDeleteModal) {
     userDeleteModal.on('hidden.bs.modal', function (e) {
         userDeleteForm.trigger('reset');
-        setInputValue(getFormInputByName(userDeleteForm, 'user_id'), '');
+        setInputValue(getFormInputByName(userDeleteForm, 'id'), '');
         setInputValue(getFormInputByName(userDeleteForm, 'action'), '');
     })
 }
 
-function getUserResponse(user_id) {
+function getUserResponse(id) {
     let user = null;
     ajaxRequest(
         '/includes/process-request.php',
-        {action: 'user_get', user_id,},
+        {action: 'user_get', id,},
         function (response) {
             user = response;
         },

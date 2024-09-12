@@ -4,7 +4,7 @@ require_once 'functions.php';
 
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['action'])) {
     $action = sanitizeData($_POST['action']);
-    $userId = isset($_POST['user_id']) ? sanitizeData($_POST['user_id']) : null;
+    $userId = isset($_POST['id']) ? sanitizeData($_POST['id']) : null;
 
     switch ($action) {
         case 'user_create':
@@ -44,7 +44,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['action'])) {
 
     switch ($action) {
         case 'user_get':
-            $userId = isset($_GET['user_id']) ? sanitizeData($_GET['user_id']) : null;
+            $userId = isset($_GET['id']) ? sanitizeData($_GET['id']) : null;
 
             requestUserGet($userId);
             break;

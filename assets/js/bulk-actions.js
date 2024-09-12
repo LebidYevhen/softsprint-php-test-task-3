@@ -82,7 +82,7 @@ function handleBulkActionsFormValidation(form) {
 }
 
 function bulkActionsUserDeleteModalOpen(userDeleteForm, userDeleteModal, usersIds) {
-    setInputValue(getFormInputByName(userDeleteForm, 'user_id'), usersIds);
+    setInputValue(getFormInputByName(userDeleteForm, 'id'), usersIds);
     setInputValue(getFormInputByName(userDeleteForm, 'action'), 'user_delete_multiple');
     userDeleteModal.find('.modal-body').html('Are you sure you want to delete <b>these users</b>?');
     userDeleteModal.modal('show');

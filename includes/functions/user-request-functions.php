@@ -124,7 +124,7 @@ function handleUserUpdate($userId, $firstName, $lastName, $roleId, $status): voi
         ],
     ]);
 
-    if (!isset($_POST['user_id']) || !isUserExists($_POST['user_id'])) {
+    if (empty($userId) || !isUserExists($userId)) {
         $data = [
             'status' => false,
             'error' => [
