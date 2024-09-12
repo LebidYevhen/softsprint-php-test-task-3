@@ -73,6 +73,14 @@ function handleBulkActionsFormValidation(form) {
         return false;
     }
 
+    const usersIds = getSelectedUserIds();
+    const usersCountResponse = getUsersCountResponse(usersIds.join(','));
+
+    if (usersCountResponse.count !== usersIds.length) {
+        bulkActionModal.modal('show').find('.modal-body').html('Some of the selected users were not found. Please refresh the page and try again.');
+        return false;
+    }
+
     if (bulkAction === 'delete' && selectedUsers > 0) {
         bulkActionsUserDeleteModalOpen($('.user-delete-form'), $('#userDeleteModal'), getSelectedUserIds());
         return false;
@@ -84,7 +92,7 @@ function handleBulkActionsFormValidation(form) {
 function bulkActionsUserDeleteModalOpen(userDeleteForm, userDeleteModal, usersIds) {
     setInputValue(getFormInputByName(userDeleteForm, 'user_id'), usersIds);
     setInputValue(getFormInputByName(userDeleteForm, 'action'), 'user_delete_multiple');
-    userDeleteModal.find('.modal-body').html('Are you sure you want to delete these users?');
+    userDeleteModal.find('.modal-body').html('Are you sure you want to delete <b>these users</b>?');
     userDeleteModal.modal('show');
 }
 
@@ -110,4 +118,23 @@ function getSelectedUserIds() {
     return $('.user-selection-checkbox:checked').map(function () {
         return $(this).val();
     }).get();
+}
+
+function getUsersCountResponse(users_ids) {
+    let count = null;
+    ajaxRequest(
+        '/includes/process-request.php',
+        {action: 'user_get_count', users_ids,},
+        function (response) {
+            count = response;
+        },
+        function (xhr, status) {
+            addStatusMessage('Could not reach server, please try again later.', 'alert-danger');
+        },
+        'GET',
+        'json',
+        false
+    );
+
+    return count;
 }

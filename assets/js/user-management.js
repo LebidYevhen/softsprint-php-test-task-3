@@ -147,8 +147,12 @@ function userCreateUpdateModalClose(userCreateUpdateForm, userCreateUpdateModal)
     userCreateUpdateModal.on('hidden.bs.modal', function (e) {
         userCreateUpdateForm.trigger('reset');
         clearFormErrors(userCreateUpdateForm);
+
         setInputValue(getFormInputByName(userCreateUpdateForm, 'action'), '');
+
+        deleteHiddenInput(userCreateUpdateForm, 'user_id');
         setInputValue(getFormInputByName(userCreateUpdateForm, 'user_id'), '');
+
         userCreateUpdateForm.find("button[type='submit']").text('');
     })
 }
@@ -163,7 +167,10 @@ function handleUserCreateModalOpen(userCreateUpdateForm, userCreateUpdateModal, 
 function handleUserUpdateModalOpen(userCreateUpdateForm, userCreateUpdateModal, action, modalTitle, submitText, userId) {
     userCreateUpdateModal.find('.modal-title').html(modalTitle);
     setInputValue(getFormInputByName(userCreateUpdateForm, 'action'), action);
+
+    createHiddenInput(userCreateUpdateForm, 'user_id');
     setInputValue(getFormInputByName(userCreateUpdateForm, 'user_id'), userId);
+
     userCreateUpdateForm.find("button[type='submit']").text(submitText);
     userCreateUpdateModal.modal('show');
 }
@@ -171,7 +178,7 @@ function handleUserUpdateModalOpen(userCreateUpdateForm, userCreateUpdateModal, 
 function handleUserDeleteModalOpen(userDeleteModal, userDeleteForm, user) {
     setInputValue(getFormInputByName(userDeleteForm, 'user_id'), user.id);
     setInputValue(getFormInputByName(userDeleteForm, 'action'), 'user_delete');
-    userDeleteModal.find('.modal-body').html('Are you sure you want to delete the user?');
+    userDeleteModal.find('.modal-body').html(`Are you sure you want to delete user <b>${user.first_name} ${user.last_name}</b>?`);
     userDeleteModal.modal('show');
 }
 
@@ -267,7 +274,7 @@ function removeUserRow(userId) {
 
 function changeUserRowStatusClass(userId, status) {
     const userRow = getUserRow(userId);
-    const userStatusEl =  userRow.find('.user-status');
+    const userStatusEl = userRow.find('.user-status');
     status === 'active' ? userStatusEl.addClass('active') : userStatusEl.removeClass('active');
 }
 
@@ -281,4 +288,16 @@ function isUserSelected(id) {
 
 function getSelectRoleNameById(id) {
     return $('#role_id').find(`option[value=${id}]`).data('roleName');
+}
+
+function createHiddenInput(form, name) {
+    const input = $('<input>').attr({
+        type: 'hidden',
+        name: name,
+    });
+    form.append(input);
+}
+
+function deleteHiddenInput(form, name) {
+    form.find(`input[name=${name}]`).remove();
 }

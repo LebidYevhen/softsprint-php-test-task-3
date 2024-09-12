@@ -47,14 +47,14 @@ function getUsers(): array
 
 function updateUsersStatusMultiple(array $users_ids, int $status)
 {
-    $placeholders = rtrim(str_repeat('?,', count($users_ids)), ',');
+    $placeholders = getPlaceholders($users_ids);
     $query = "UPDATE users SET status = '$status' WHERE id IN ($placeholders)";
     return preparedQuery($query, $users_ids);
 }
 
 function deleteUsersMultiple(array $users_ids)
 {
-    $placeholders = rtrim(str_repeat('?,', count($users_ids)), ',');
+    $placeholders = getPlaceholders($users_ids);
     $query = "DELETE FROM users WHERE id IN ($placeholders)";
     return preparedQuery($query, $users_ids);
 }

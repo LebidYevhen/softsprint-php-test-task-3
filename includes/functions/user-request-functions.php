@@ -4,22 +4,45 @@ function requestUserGet($userId)
 {
     $user = getUser($userId);
 
-    if ($user) {
+    if (!$user) {
         $data = [
-            'status' => true,
-            'error' => null,
-            'user' => $user,
+            'status' => false,
+            'error' => [
+                'code' => 100,
+                'message' => 'User not found.',
+            ]
         ];
 
         handleJsonOutput($data);
     }
 
     $data = [
-        'status' => false,
-        'error' => [
-            'code' => 100,
-            'message' => 'User not found.',
-        ]
+        'status' => true,
+        'error' => null,
+        'user' => $user,
+    ];
+
+    handleJsonOutput($data);
+}
+
+function requestUsersCountGet($usersIds)
+{
+    if (empty($usersIds)) {
+        $data = [
+            'status' => false,
+            'error' => [
+                'code' => 400,
+                'message' => 'Users not found.',
+            ],
+        ];
+
+        handleJsonOutput($data);
+    }
+
+    $data = [
+        'status' => true,
+        'error' => null,
+        'count' => getColumnRecordsInTableCount('users', 'id', $usersIds),
     ];
 
     handleJsonOutput($data);
@@ -63,10 +86,10 @@ function handleUserCreate()
     }
 
     $userId = createUser(
-        sanitizeInput($_POST['first_name']),
-        sanitizeInput($_POST['last_name']),
-        sanitizeInput($_POST['role_id']),
-        filter_var(sanitizeInput($_POST['status']), FILTER_VALIDATE_BOOLEAN) ? 1 : 0
+        sanitizeData($_POST['first_name']),
+        sanitizeData($_POST['last_name']),
+        sanitizeData($_POST['role_id']),
+        filter_var(sanitizeData($_POST['status']), FILTER_VALIDATE_BOOLEAN) ? 1 : 0
     );
     $data = [
         'status' => true,
@@ -101,7 +124,7 @@ function handleUserUpdate($userId, $firstName, $lastName, $roleId, $status): voi
         ],
     ]);
 
-    if (!isset($_POST['user_id'])) {
+    if (!isset($_POST['user_id']) || !isUserExists($_POST['user_id'])) {
         $data = [
             'status' => false,
             'error' => [
@@ -112,7 +135,6 @@ function handleUserUpdate($userId, $firstName, $lastName, $roleId, $status): voi
 
         handleJsonOutput($data);
     }
-
 
     if (empty($validate)) {
         $userId = updateUser($userId, $firstName, $lastName, $roleId, $status);

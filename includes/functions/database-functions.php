@@ -37,9 +37,25 @@ function getLastInsertedId(): int|string
     return mysqli_insert_id($connection);
 }
 
+function getColumnRecordsInTableCount(string $table, string $column, array $values): int
+{
+    $placeholders = getPlaceholders($values);
+    $sql = "SELECT COUNT(*) AS count
+            FROM $table
+            WHERE $column IN ($placeholders)";
+    $stmt = preparedQuery($sql, $values);
+
+    return mysqli_fetch_column(getStmtResult($stmt));
+}
+
 function isValueInTableExists($value, $table, $column, $type = null): bool
 {
     $query = "SELECT $column FROM $table WHERE $column = ? LIMIT 1";
     $stmt = getStmtResult(preparedQuery($query, [$value], $type));
     return mysqli_num_rows($stmt) > 0;
+}
+
+function getPlaceholders($values): string
+{
+    return rtrim(str_repeat('?,', count($values)), ',');
 }

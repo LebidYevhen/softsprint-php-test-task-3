@@ -39,6 +39,8 @@ function addStatusMessage(message, type, container = '.status-messages', locatio
     const statusElement = $('<div></div>').addClass(`alert ${type}`).text(message);
     container = $(container);
 
+    clearStatusMessage(container, type);
+
     if (location === 'prepend') {
         container.prepend(statusElement);
     } else if (location === 'append') {
@@ -54,6 +56,10 @@ function addStatusMessage(message, type, container = '.status-messages', locatio
             statusElement.remove();
         }, 5000);
     }
+}
+
+function clearStatusMessage(container, type) {
+    container.find(`.alert.${type}`).remove();
 }
 
 function scrollTo(element, speed = 500) {

@@ -44,7 +44,6 @@ $user_roles = getRoles();
                     <button type="submit" class="btn btn-primary">Add</button>
                 </div>
                 <input type="hidden" name="action">
-                <input type="hidden" name="user_id">
             </form>
         </div>
     </div>
