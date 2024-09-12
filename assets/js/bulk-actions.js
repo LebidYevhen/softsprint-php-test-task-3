@@ -73,14 +73,6 @@ function handleBulkActionsFormValidation(form) {
         return false;
     }
 
-    const usersIds = getSelectedUserIds();
-    const usersCountResponse = getUsersCountResponse(usersIds.join(','));
-
-    if (usersCountResponse.count !== usersIds.length) {
-        bulkActionModal.modal('show').find('.modal-body').html('Some of the selected users were not found. Please refresh the page and try again.');
-        return false;
-    }
-
     if (bulkAction === 'delete' && selectedUsers > 0) {
         bulkActionsUserDeleteModalOpen($('.user-delete-form'), $('#userDeleteModal'), getSelectedUserIds());
         return false;

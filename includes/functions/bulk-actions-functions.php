@@ -16,6 +16,8 @@ function handleBulkAction(string $bulkAction, string $usersIdsStr): void
 
     $usersIds = explode(',', $usersIdsStr);
 
+    handleCountNotEqualsResponse($usersIds);
+
     switch ($_POST['bulk_action']) {
         case 'set_active':
             updateUsersStatusMultiple($usersIds, 1);
@@ -47,12 +49,9 @@ function handleUserDeleteMultiple($users_ids): void
         handleJsonOutput($data);
     }
 
-    echo '<pre>';
-    print_r($users_ids);
-    echo '</pre>';
-    die();
-
     $usersIds = explode(',', $users_ids);
+
+    handleCountNotEqualsResponse($usersIds);
 
     deleteUsersMultiple($usersIds);
     $data = [
@@ -62,4 +61,21 @@ function handleUserDeleteMultiple($users_ids): void
     ];
 
     handleJsonOutput($data);
+}
+
+function handleCountNotEqualsResponse(array $ids)
+{
+    $usersCount = getColumnRecordsInTableCount('users', 'id', $ids);
+
+    if (count($ids) !== $usersCount) {
+        $data = [
+            'status' => false,
+            'error' => [
+                'code' => 404,
+                'message' => 'Some of the selected users were not found. Please refresh the page and try again.'
+            ],
+        ];
+
+        handleJsonOutput($data);
+    }
 }
