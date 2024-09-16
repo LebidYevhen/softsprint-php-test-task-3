@@ -25,7 +25,6 @@ $userRoles = getRoles();
             <td class="align-middle">
                 <label class="form-check-label">
                     <input class="form-check-input user-id user-selection-checkbox" type="checkbox"
-                           name="checkBoxesArray[]"
                            value="<?php echo $user['id']; ?>">
                 </label>
             </td>
@@ -36,10 +35,11 @@ $userRoles = getRoles();
             </td>
             <td class="text-center align-middle">
                 <div class="border border-dark rounded d-inline-block">
-                    <a href="#" class="d-inline-block text-decoration-none p-1 border-end border-dark user-update-link"
+                    <a href="#" class="d-inline-block text-decoration-none p-1 border-end border-dark user-create-update" data-user-id="<?php echo $user['id']; ?>"
                        data-user-create-update-action="user_update">
                         <i class="bi bi-pencil-square text-secondary"></i>
                     </a>
+
                     <a href="#"
                        class="d-inline-block text-decoration-none p-1 user-delete-link">
                         <i class="bi bi-trash-fill text-secondary"></i>

@@ -5,15 +5,12 @@ $(document).ready(function () {
 function initUserManagement() {
     handleUserDelete();
     userCreateUpdateModalOpen();
-    userCreateUpdateModalClose();
     submitUserCreateUpdateForm();
 }
 
 function handleUserDelete() {
     const userDeleteModal = $('#userDeleteModal');
     const userDeleteForm = $('.user-delete-form');
-
-    handleUserDeleteModalClose(userDeleteForm, userDeleteModal);
 
     $('.users-table').on('click', '.user-delete-link', function (e) {
         e.preventDefault();
@@ -36,8 +33,10 @@ function handleUserDelete() {
 function submitUserCreateUpdateForm() {
     $('.user-create-update-form').submit(function (e) {
         e.preventDefault();
-        const formData = extractFormData($(this), ['id', 'action', 'first_name', 'last_name', 'role_id']);
-        formData.status = $(this).find("[name='status']").is(':checked');
+        const form = $(this);
+
+        const formData = extractFormData(form, ['id', 'action', 'first_name', 'last_name', 'role_id']);
+        formData.status = form.find("[name='status']").is(':checked');
 
         clearFormErrors($(this));
 
@@ -63,7 +62,7 @@ function submitUserCreateUpdateForm() {
                             addStatusMessage('User successfully updated.', 'alert-success');
                             break;
                     }
-                    $(this).trigger('reset');
+                    form.trigger('reset');
                     modalHide($('#userCreateUpdateModal'));
                 }
             },
@@ -93,7 +92,7 @@ function submitUserDeleteForm() {
                 } else {
                     if (formData.action === 'user_delete') {
                         removeUserRow(response.user.id);
-                        addStatusMessage('The user has been successfully deleted.', 'alert-success');
+                        addStatusMessage(`User ${response.user.first_name} ${response.user.last_name} has been successfully deleted.`, 'alert-success');
                     }
                     if (formData.action === 'user_delete_multiple') {
                         response.users_ids.forEach(userId => {
@@ -114,68 +113,55 @@ function submitUserDeleteForm() {
 }
 
 function userCreateUpdateModalOpen() {
-    const userCreateUpdateForm = $('.user-create-update-form');
-    const userCreateUpdateModal = $('#userCreateUpdateModal');
-
-
-    $(document).on('click', '.user-create-btn, .users-table .user-update-link', function (e) {
+    $('body').on('click', '.user-create-update', function (e) {
         e.preventDefault();
-        const userCreateUpdateAction = $(this).data('userCreateUpdateAction');
-
-        if (userCreateUpdateAction === 'user_create') {
-            handleUserCreateModalOpen(userCreateUpdateForm, userCreateUpdateModal, 'user_create', 'Add User', 'Add');
-        }
-
-        if (userCreateUpdateAction === 'user_update') {
-            const userTableRow = $(this).closest('.user-table-row')
-            const userId = userTableRow.data('userId');
-
-            const response = getUserResponse(userId);
-            if (!response.status) {
-                addStatusMessage(response.error.message, 'alert-danger');
-            } else {
-                setInputValue(getFormInputByName(userCreateUpdateForm, 'first_name'), response.user.first_name);
-                setInputValue(getFormInputByName(userCreateUpdateForm, 'last_name'), response.user.last_name);
-                setInputValue(getFormInputByName(userCreateUpdateForm, 'status'), response.user.status, true, response.user.status);
-                userCreateUpdateForm.find("select[name='role_id']").val(response.user.role_id);
-                handleUserUpdateModalOpen(userCreateUpdateForm, userCreateUpdateModal, 'user_update', 'Update User', 'Update', userTableRow.data('userId'));
-            }
-        }
-    });
-}
-
-function userCreateUpdateModalClose() {
-    const userCreateUpdateForm = $('.user-create-update-form');
-    const userCreateUpdateModal = $('#userCreateUpdateModal');
-
-    userCreateUpdateModal.on('hidden.bs.modal', function (e) {
-        userCreateUpdateForm.trigger('reset');
-        clearFormErrors(userCreateUpdateForm);
-
-        setInputValue(getFormInputByName(userCreateUpdateForm, 'action'), '');
-
-        deleteHiddenInput(userCreateUpdateForm, 'id');
-
-        userCreateUpdateForm.find("button[type='submit']").text('');
+        const userId = $(this).data('userId');
+        handleUserCreateUpdateModalOpen(userId);
     })
 }
 
-function handleUserCreateModalOpen(userCreateUpdateForm, userCreateUpdateModal, action, modalTitle, submitText) {
-    userCreateUpdateModal.find('.modal-title').html(modalTitle);
-    setInputValue(getFormInputByName(userCreateUpdateForm, 'action'), action);
-    userCreateUpdateForm.find("button[type='submit']").text(submitText);
+function handleUserCreateUpdateModalOpen(userId) {
+    let user = {
+        first_name: null,
+        last_name: null,
+        role_id: null,
+        status: null,
+    };
+
+    let modalTitle = 'Add User';
+    let submitText = 'Add';
+    let action = 'user_create';
+
+    if (userId) {
+        const response = getUserResponse(userId);
+        if (response.status) {
+            user = {...response.user};
+            modalTitle = 'Update User';
+            submitText = 'Update';
+            action = 'user_update';
+        } else {
+            addStatusMessage(response.error.message, 'alert-danger');
+            return;
+        }
+    }
+
+    populateUserCreateUpdateForm(user, action, modalTitle, submitText)
+
+    const userCreateUpdateModal = $('#userCreateUpdateModal');
     userCreateUpdateModal.modal('show');
 }
 
-function handleUserUpdateModalOpen(userCreateUpdateForm, userCreateUpdateModal, action, modalTitle, submitText, userId) {
-    userCreateUpdateModal.find('.modal-title').html(modalTitle);
+function populateUserCreateUpdateForm(user, action, modalTitle, submitText) {
+    const userCreateUpdateForm = $('.user-create-update-form');
+
+    setInputValue(getFormInputByName(userCreateUpdateForm, 'first_name'), user.first_name);
+    setInputValue(getFormInputByName(userCreateUpdateForm, 'last_name'), user.last_name);
+    setInputValue(getFormInputByName(userCreateUpdateForm, 'status'), user.status, true, user.status);
     setInputValue(getFormInputByName(userCreateUpdateForm, 'action'), action);
-
-    createHiddenInput(userCreateUpdateForm, 'id');
-    setInputValue(getFormInputByName(userCreateUpdateForm, 'id'), userId);
-
+    setInputValue(getFormInputByName(userCreateUpdateForm, 'id'), user.id);
+    userCreateUpdateForm.find("select[name='role_id']").val(user.role_id);
+    userCreateUpdateForm.find('.modal-title').html(modalTitle);
     userCreateUpdateForm.find("button[type='submit']").text(submitText);
-    userCreateUpdateModal.modal('show');
 }
 
 function handleUserDeleteModalOpen(userDeleteModal, userDeleteForm, user) {
@@ -183,14 +169,6 @@ function handleUserDeleteModalOpen(userDeleteModal, userDeleteForm, user) {
     setInputValue(getFormInputByName(userDeleteForm, 'action'), 'user_delete');
     userDeleteModal.find('.modal-body').html(`Are you sure you want to delete user <b>${user.first_name} ${user.last_name}</b>?`);
     userDeleteModal.modal('show');
-}
-
-function handleUserDeleteModalClose(userDeleteForm, userDeleteModal) {
-    userDeleteModal.on('hidden.bs.modal', function (e) {
-        userDeleteForm.trigger('reset');
-        setInputValue(getFormInputByName(userDeleteForm, 'id'), '');
-        setInputValue(getFormInputByName(userDeleteForm, 'action'), '');
-    })
 }
 
 function getUserResponse(id) {
@@ -222,7 +200,7 @@ function getUserRowHtml(user) {
     <tr data-user-id="${user.id}" class="user-table-row">
         <td class="align-middle">
             <label class="form-check-label">
-                <input class="form-check-input user-id user-selection-checkbox" type="checkbox" name="checkBoxesArray[]"
+                <input class="form-check-input user-id user-selection-checkbox" type="checkbox"
                        value="${user.id}">
             </label>
         </td>
@@ -233,7 +211,7 @@ function getUserRowHtml(user) {
         </td>
         <td class="text-center align-middle">
             <div class="border border-dark rounded d-inline-block">
-                <a href="#" class="d-inline-block text-decoration-none p-1 border-end border-dark user-update-link" data-user-create-update-action="user_update">
+                <a href="#" class="d-inline-block text-decoration-none p-1 border-end border-dark user-create-update" data-user-id="${user.id}">
                     <i class="bi bi-pencil-square text-secondary"></i>
                 </a>
                 <a href="#"
@@ -280,16 +258,4 @@ function isUserSelected(id) {
 
 function getSelectRoleNameById(id) {
     return $('#role_id').find(`option[value=${id}]`).data('roleName');
-}
-
-function createHiddenInput(form, name) {
-    const input = $('<input>').attr({
-        type: 'hidden',
-        name: name,
-    });
-    form.append(input);
-}
-
-function deleteHiddenInput(form, name) {
-    form.find(`input[name=${name}]`).remove();
 }

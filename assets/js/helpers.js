@@ -10,8 +10,8 @@ function removeElClassByClassName(parent, className) {
     parent.find(`.${className}`).removeClass(className);
 }
 
-function highlightFormErrors(form, errors) {
-    $.each(errors.fields, function (index, {fieldName, fieldValue, message}) {
+function highlightFormErrors(form, error) {
+    $.each(error.fields, function (index, {fieldName, fieldValue, message}) {
         form.find(`[name='${fieldName}']`).after(`<p class="text-danger">${message}</p>`).addClass('border-danger');
     });
 }
