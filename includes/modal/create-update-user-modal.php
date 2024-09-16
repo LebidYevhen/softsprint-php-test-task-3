@@ -1,6 +1,6 @@
 <?php
 
-$user_roles = getRoles();
+$userRoles = getRoles();
 ?>
 
 <!-- Add User Modal -->
@@ -33,8 +33,8 @@ $user_roles = getRoles();
                         <select class="form-select" aria-label="User add role select" id="role_id" name="role_id">
                             <option value="" selected>-Please Select-</option>
                             <?php
-                            foreach ($user_roles as $role) {
-                                echo sprintf('<option value="%s" data-role-name="%s">%s</option>', $role['id'], $role['name'], $role['name']);
+                            foreach ($userRoles as $id => $name) {
+                                echo sprintf('<option value="%s" data-role-name="%s">%s</option>', $id, $name, $name);
                             } ?>
                         </select>
                     </div>

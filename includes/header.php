@@ -7,9 +7,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>User Management System</title>
     <link rel="stylesheet" href="/assets/css/modules/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="/assets/css/styles.css">
 </head>
 <body>
-
-<div class="container py-5">
-    <div class="col-12">

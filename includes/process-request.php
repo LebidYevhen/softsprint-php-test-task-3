@@ -48,23 +48,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['action'])) {
 
             requestUserGet($userId);
             break;
-        case 'user_get_count':
-            $usersIds = isset($_GET['users_ids']) ? sanitizeData($_GET['users_ids']) : null;
-
-            requestUsersCountGet(explode(',', $usersIds));
-            break;
         default:
             invalidActionHandler();
     }
 }
 
-function invalidActionHandler()
+function invalidActionHandler(): void
 {
-    handleJsonOutput([
-        'status' => false,
-        'error' => [
-            'code' => 400,
-            'message' => 'Invalid action.',
-        ]
-    ]);
+    handleJsonOutput(buildResponseData(false, 400, 'Invalid action.'));
 }

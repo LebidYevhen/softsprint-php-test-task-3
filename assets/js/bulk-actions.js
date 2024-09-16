@@ -5,10 +5,6 @@ $(document).ready(function () {
 function initBulkAction() {
     selectAllUsers();
     userSelection();
-    handleBulkActions();
-}
-
-function handleBulkActions() {
     submitBulkActionsForm();
 }
 
@@ -23,10 +19,12 @@ function submitBulkActionsForm() {
 
             setInputValue(getFormInputByName($(this), 'users_ids'), usersIds);
 
-            ajaxRequest(
-                '/includes/process-request.php',
-                formData,
-                function (response) {
+            $.ajax({
+                method: 'POST',
+                url: '/includes/process-request.php',
+                data: formData,
+                dataType: 'json',
+                success: function (response) {
                     if (!response.status) {
                         addStatusMessage(response.error.message, 'alert-danger');
                         return;
@@ -45,10 +43,10 @@ function submitBulkActionsForm() {
                     $('.user-selection-checkbox, .select-all-users-checkbox').prop('checked', false);
                     $(this).trigger('reset');
                 },
-                function (xhr, status) {
+                error: function (xhr, status) {
                     console.error("Error fetching modal content:", status);
                 }
-            )
+            });
         }
     })
 }
@@ -110,23 +108,4 @@ function getSelectedUserIds() {
     return $('.user-selection-checkbox:checked').map(function () {
         return $(this).val();
     }).get();
-}
-
-function getUsersCountResponse(users_ids) {
-    let count = null;
-    ajaxRequest(
-        '/includes/process-request.php',
-        {action: 'user_get_count', users_ids,},
-        function (response) {
-            count = response;
-        },
-        function (xhr, status) {
-            addStatusMessage('Could not reach server, please try again later.', 'alert-danger');
-        },
-        'GET',
-        'json',
-        false
-    );
-
-    return count;
 }

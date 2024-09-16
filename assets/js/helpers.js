@@ -10,19 +10,6 @@ function removeElClassByClassName(parent, className) {
     parent.find(`.${className}`).removeClass(className);
 }
 
-function ajaxRequest(url, data, success, error, type = 'POST', dataType = 'json', async = true, encode = true) {
-    return $.ajax({
-        url,
-        data,
-        success,
-        error,
-        type,
-        dataType,
-        async,
-        encode
-    });
-}
-
 function highlightFormErrors(form, errors) {
     $.each(errors.fields, function (index, {fieldName, fieldValue, message}) {
         form.find(`[name='${fieldName}']`).after(`<p class="text-danger">${message}</p>`).addClass('border-danger');

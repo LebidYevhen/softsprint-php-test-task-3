@@ -3,18 +3,10 @@ $(document).ready(function () {
 });
 
 function initUserManagement() {
-    handleUserCreateUpdate();
     handleUserDelete();
-}
-
-function handleUserCreateUpdate() {
-    const userCreateUpdateForm = $('.user-create-update-form');
-    const userCreateUpdateModal = $('#userCreateUpdateModal');
-
-    userCreateUpdateModalOpen(userCreateUpdateForm, userCreateUpdateModal);
-    userCreateUpdateModalClose(userCreateUpdateForm, userCreateUpdateModal);
-
-    submitUserCreateUpdateForm(userCreateUpdateForm);
+    userCreateUpdateModalOpen();
+    userCreateUpdateModalClose();
+    submitUserCreateUpdateForm();
 }
 
 function handleUserDelete() {
@@ -41,18 +33,20 @@ function handleUserDelete() {
     submitUserDeleteForm();
 }
 
-function submitUserCreateUpdateForm(form) {
+function submitUserCreateUpdateForm() {
     $('.user-create-update-form').submit(function (e) {
         e.preventDefault();
-        const formData = extractFormData(form, ['id', 'action', 'first_name', 'last_name', 'role_id']);
-        formData.status = form.find("[name='status']").is(':checked');
+        const formData = extractFormData($(this), ['id', 'action', 'first_name', 'last_name', 'role_id']);
+        formData.status = $(this).find("[name='status']").is(':checked');
 
-        clearFormErrors(form);
+        clearFormErrors($(this));
 
-        ajaxRequest(
-            '/includes/process-request.php',
-            formData,
-            function (response) {
+        $.ajax({
+            method: 'POST',
+            url: '/includes/process-request.php',
+            data: formData,
+            dataType: 'json',
+            success: function (response) {
                 if (!response.status) {
                     highlightFormErrors(form, response.error);
                     addStatusMessage(response.error.message, 'alert-danger', '.user-create-update-form .modal-body', 'prepend', false, false);
@@ -69,14 +63,14 @@ function submitUserCreateUpdateForm(form) {
                             addStatusMessage('User successfully updated.', 'alert-success');
                             break;
                     }
-                    form.trigger('reset');
+                    $(this).trigger('reset');
                     modalHide($('#userCreateUpdateModal'));
                 }
             },
-            function (xhr, status) {
+            error: function (xhr, status) {
                 addStatusMessage('Could not reach server, please try again later.', 'alert-danger', '.user-create-update-form', 'prepend');
             },
-        )
+        });
     });
 }
 
@@ -86,10 +80,13 @@ function submitUserDeleteForm() {
         const deleteUserModal = $('#userDeleteModal');
 
         const formData = extractFormData($(this), ['action', 'id']);
-        ajaxRequest(
-            '/includes/process-request.php',
-            formData,
-            function (response) {
+
+        $.ajax({
+            method: 'POST',
+            url: '/includes/process-request.php',
+            data: formData,
+            dataType: 'json',
+            success: function (response) {
                 if (!response.status) {
                     modalHide(deleteUserModal);
                     addStatusMessage(response.error.message, 'alert-danger');
@@ -108,42 +105,49 @@ function submitUserDeleteForm() {
                     modalHide(deleteUserModal);
                 }
             },
-            function (xhr, status) {
+            error: function (xhr, status) {
                 modalHide(deleteUserModal);
                 addStatusMessage('Could not reach server, please try again later.', 'alert-danger');
-            });
+            }
+        });
     });
 }
 
-function userCreateUpdateModalOpen(userCreateUpdateForm, userCreateUpdateModal) {
+function userCreateUpdateModalOpen() {
+    const userCreateUpdateForm = $('.user-create-update-form');
+    const userCreateUpdateModal = $('#userCreateUpdateModal');
+
+
     $(document).on('click', '.user-create-btn, .users-table .user-update-link', function (e) {
         e.preventDefault();
         const userCreateUpdateAction = $(this).data('userCreateUpdateAction');
 
-        switch (userCreateUpdateAction) {
-            case 'user_create':
-                handleUserCreateModalOpen(userCreateUpdateForm, userCreateUpdateModal, 'user_create', 'Add User', 'Add');
-                break;
-            case 'user_update':
-                const userTableRow = $(this).closest('.user-table-row')
-                const userId = userTableRow.data('userId');
+        if (userCreateUpdateAction === 'user_create') {
+            handleUserCreateModalOpen(userCreateUpdateForm, userCreateUpdateModal, 'user_create', 'Add User', 'Add');
+        }
 
-                const response = getUserResponse(userId);
-                if (!response.status) {
-                    addStatusMessage(response.error.message, 'alert-danger');
-                } else {
-                    setInputValue(getFormInputByName(userCreateUpdateForm, 'first_name'), response.user.first_name);
-                    setInputValue(getFormInputByName(userCreateUpdateForm, 'last_name'), response.user.last_name);
-                    setInputValue(getFormInputByName(userCreateUpdateForm, 'status'), response.user.status, true, response.user.status);
-                    userCreateUpdateForm.find("select[name='role_id']").val(response.user.role_id);
-                    handleUserUpdateModalOpen(userCreateUpdateForm, userCreateUpdateModal, 'user_update', 'Update User', 'Update', userTableRow.data('userId'));
-                }
-                break;
+        if (userCreateUpdateAction === 'user_update') {
+            const userTableRow = $(this).closest('.user-table-row')
+            const userId = userTableRow.data('userId');
+
+            const response = getUserResponse(userId);
+            if (!response.status) {
+                addStatusMessage(response.error.message, 'alert-danger');
+            } else {
+                setInputValue(getFormInputByName(userCreateUpdateForm, 'first_name'), response.user.first_name);
+                setInputValue(getFormInputByName(userCreateUpdateForm, 'last_name'), response.user.last_name);
+                setInputValue(getFormInputByName(userCreateUpdateForm, 'status'), response.user.status, true, response.user.status);
+                userCreateUpdateForm.find("select[name='role_id']").val(response.user.role_id);
+                handleUserUpdateModalOpen(userCreateUpdateForm, userCreateUpdateModal, 'user_update', 'Update User', 'Update', userTableRow.data('userId'));
+            }
         }
     });
 }
 
-function userCreateUpdateModalClose(userCreateUpdateForm, userCreateUpdateModal) {
+function userCreateUpdateModalClose() {
+    const userCreateUpdateForm = $('.user-create-update-form');
+    const userCreateUpdateModal = $('#userCreateUpdateModal');
+
     userCreateUpdateModal.on('hidden.bs.modal', function (e) {
         userCreateUpdateForm.trigger('reset');
         clearFormErrors(userCreateUpdateForm);
@@ -191,19 +195,20 @@ function handleUserDeleteModalClose(userDeleteForm, userDeleteModal) {
 
 function getUserResponse(id) {
     let user = null;
-    ajaxRequest(
-        '/includes/process-request.php',
-        {action: 'user_get', id,},
-        function (response) {
+
+    $.ajax({
+        method: 'GET',
+        url: '/includes/process-request.php',
+        data: {action: 'user_get', id},
+        dataType: 'json',
+        async: false,
+        success: function (response) {
             user = response;
         },
-        function (xhr, status) {
+        function(xhr, status) {
             addStatusMessage('Could not reach server, please try again later.', 'alert-danger');
         },
-        'GET',
-        'json',
-        false
-    );
+    });
 
     return user;
 }
@@ -229,23 +234,11 @@ function getUserRowHtml(user) {
         <td class="text-center align-middle">
             <div class="border border-dark rounded d-inline-block">
                 <a href="#" class="d-inline-block text-decoration-none p-1 border-end border-dark user-update-link" data-user-create-update-action="user_update">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="grey"
-                         class="bi bi-pencil-square" viewBox="0 0 16 16">
-                        <path
-                                d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
-                        <path fill-rule="evenodd"
-                              d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"/>
-                    </svg>
+                    <i class="bi bi-pencil-square text-secondary"></i>
                 </a>
                 <a href="#"
                    class="d-inline-block text-decoration-none p-1 user-delete-link">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="grey" class="bi bi-trash"
-                         viewBox="0 0 16 16">
-                        <path
-                                d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
-                        <path
-                                d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
-                    </svg>
+                    <i class="bi bi-trash-fill text-secondary"></i>
                 </a>
             </div>
         </td>
