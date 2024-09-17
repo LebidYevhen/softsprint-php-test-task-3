@@ -3,30 +3,9 @@ $(document).ready(function () {
 });
 
 function initUserManagement() {
-    handleUserDelete();
-    userCreateUpdateModalOpen();
+    userCreateUpdateModalOpen($('.user-create-update'));
+    userDeleteModalOpen($('.user-delete-link'));
     submitUserCreateUpdateForm();
-}
-
-function handleUserDelete() {
-    const userDeleteModal = $('#userDeleteModal');
-    const userDeleteForm = $('.user-delete-form');
-
-    $('.users-table').on('click', '.user-delete-link', function (e) {
-        e.preventDefault();
-
-        const userTableRow = $(this).closest('.user-table-row')
-        const userId = userTableRow.data('userId');
-        const response = getUserResponse(userId);
-
-        if (!response.status) {
-            addStatusMessage(response.error.message, 'alert-danger');
-            return;
-        }
-
-        handleUserDeleteModalOpen(userDeleteModal, userDeleteForm, response.user);
-    });
-
     submitUserDeleteForm();
 }
 
@@ -112,8 +91,8 @@ function submitUserDeleteForm() {
     });
 }
 
-function userCreateUpdateModalOpen() {
-    $('body').on('click', '.user-create-update', function (e) {
+function userCreateUpdateModalOpen(element) {
+    element.on('click', function (e) {
         e.preventDefault();
         const userId = $(this).data('userId');
         handleUserCreateUpdateModalOpen(userId);
@@ -164,7 +143,27 @@ function populateUserCreateUpdateForm(user, action, modalTitle, submitText) {
     userCreateUpdateForm.find("button[type='submit']").text(submitText);
 }
 
-function handleUserDeleteModalOpen(userDeleteModal, userDeleteForm, user) {
+function userDeleteModalOpen(element) {
+    element.on('click', function (e) {
+        e.preventDefault();
+
+        const userTableRow = $(this).closest('.user-table-row')
+        const userId = userTableRow.data('userId');
+        const response = getUserResponse(userId);
+
+        if (!response.status) {
+            addStatusMessage(response.error.message, 'alert-danger');
+            return;
+        }
+
+        handleUserDeleteModalOpen(response.user);
+    });
+}
+
+function handleUserDeleteModalOpen(user) {
+    const userDeleteModal = $('#userDeleteModal');
+    const userDeleteForm = $('.user-delete-form');
+
     setInputValue(getFormInputByName(userDeleteForm, 'id'), user.id);
     setInputValue(getFormInputByName(userDeleteForm, 'action'), 'user_delete');
     userDeleteModal.find('.modal-body').html(`Are you sure you want to delete user <b>${user.first_name} ${user.last_name}</b>?`);
@@ -192,7 +191,8 @@ function getUserResponse(id) {
 }
 
 function addUserRow(user) {
-    $('.users-table').find('tbody').append(getUserRowHtml(user));
+    $('.users-table tbody').append(getUserRowHtml(user));
+    userCreateUpdateModalOpen(getUserRow(user.id).find('.user-create-update'));
 }
 
 function getUserRowHtml(user) {
@@ -234,12 +234,17 @@ function replaceUserRow(user) {
     let userCheckboxVal = isUserSelected(user.id);
 
     userRow.replaceWith(getUserRowHtml(user));
+
+    const newUserRow = getUserRow(user.id);
+    userCreateUpdateModalOpen(newUserRow.find('.user-create-update'));
+    userDeleteModalOpen(newUserRow.find('.user-delete-link'));
+
     let checkbox = usersTable.find(`.user-selection-checkbox[value='${user.id}']`);
     checkbox.prop('checked', userCheckboxVal);
 }
 
 function removeUserRow(userId) {
-    $('.users-table').find(`.user-table-row[data-user-id='${userId}']`).remove();
+    getUserRow(userId).remove();
 }
 
 function changeUserRowStatusClass(userId, status) {

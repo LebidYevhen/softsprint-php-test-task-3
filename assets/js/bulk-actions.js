@@ -39,7 +39,6 @@ function submitBulkActionsForm() {
 
                     addStatusMessage('User statuses have been successfully changed.', 'alert-success');
 
-                    setInputValue(getFormInputByName($(this), 'users_ids'), '');
                     $('.user-selection-checkbox, .select-all-users-checkbox').prop('checked', false);
                     $(this).trigger('reset');
                 },

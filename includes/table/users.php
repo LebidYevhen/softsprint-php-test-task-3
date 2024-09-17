@@ -35,8 +35,7 @@ $userRoles = getRoles();
             </td>
             <td class="text-center align-middle">
                 <div class="border border-dark rounded d-inline-block">
-                    <a href="#" class="d-inline-block text-decoration-none p-1 border-end border-dark user-create-update" data-user-id="<?php echo $user['id']; ?>"
-                       data-user-create-update-action="user_update">
+                    <a href="#" class="d-inline-block text-decoration-none p-1 border-end border-dark user-create-update" data-user-id="<?php echo $user['id']; ?>">
                         <i class="bi bi-pencil-square text-secondary"></i>
                     </a>
 
